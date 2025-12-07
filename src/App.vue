@@ -15,11 +15,11 @@
           <v-list-item-title>System Summary</v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="navigate('/wallboard')" link>
+        <v-list-item @click="navigate('/large-display')" link>
           <v-list-item-icon>
             <v-icon>mdi-monitor</v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Wallboard</v-list-item-title>
+          <v-list-item-title>Large Display</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>

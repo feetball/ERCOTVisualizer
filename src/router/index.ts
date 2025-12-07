@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import WallboardView from '../views/WallboardView.vue'
+import LargeDisplayView from '../views/LargeDisplayView.vue'
 import SystemSummaryView from '../views/SystemSummaryView.vue'
 
 const router = createRouter({
@@ -16,9 +16,9 @@ const router = createRouter({
       component: SystemSummaryView
     },
     {
-      path: '/wallboard',
-      name: 'wallboard',
-      component: WallboardView
+      path: '/large-display',
+      name: 'largeDisplay',
+      component: LargeDisplayView
     }
   ]
 })
