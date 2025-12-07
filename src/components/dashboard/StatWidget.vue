@@ -55,14 +55,12 @@ const formattedValue = computed(() => {
   if (currentValue.value === null) return '---'
   const val = safeCalculate(currentValue.value, props.config?.calculation)
   
-  // Hz gets 2 decimals, MW/other gets 0 decimals
+  // Hz gets configured decimals, MW/other gets whole numbers with commas
   let formatted: string
   if (isHz.value) {
     formatted = val.toFixed(props.config?.decimals ?? 2)
-  } else if (Math.abs(val) >= 1000000) {
-    formatted = (val / 1000000).toFixed(0) + 'M'
-  } else if (Math.abs(val) >= 10000) {
-    formatted = (val / 1000).toFixed(0) + 'K'
+  } else if (props.config?.decimals !== undefined) {
+    formatted = val.toFixed(props.config.decimals)
   } else {
     formatted = Math.round(val).toLocaleString()
   }

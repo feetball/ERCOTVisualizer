@@ -1,12 +1,17 @@
 <template>
   <div class="fill-height chart-wrapper">
     <apexchart 
+      v-if="series.length > 0"
       width="100%" 
       height="100%" 
       type="area" 
       :options="chartOptions" 
       :series="series"
+      :key="chartKey"
     ></apexchart>
+    <div v-else class="d-flex align-center justify-center fill-height">
+      <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+    </div>
   </div>
 </template>
 
@@ -43,6 +48,7 @@ const props = defineProps<{
 }>()
 
 const series = ref<SeriesData[]>([])
+const chartKey = ref(0)
 let intervalId: ReturnType<typeof setInterval> | null = null
 
 // Determine if this is a Hz chart (for decimal formatting)
@@ -94,12 +100,9 @@ const chartOptions = computed(() => ({
     labels: {
       formatter: (val: number) => {
         if (val === null || val === undefined) return ''
-        // Hz gets 2 decimals, MW gets 0 decimals
+        // Hz gets 2 decimals, MW gets whole numbers with commas
         if (isHz.value) {
           return val.toFixed(2)
-        }
-        if (Math.abs(val) >= 1000) {
-          return (val / 1000).toFixed(0) + 'K'
         }
         return Math.round(val).toLocaleString()
       },
@@ -208,6 +211,7 @@ async function fetchData() {
     }
 
     series.value = seriesData
+    chartKey.value++ // Force re-render with new data
   } catch (error) {
     console.error('Error fetching stacked chart data:', error)
   }

@@ -419,10 +419,8 @@ onUnmounted(() => {
   font-weight: 600;
   letter-spacing: 0.025em;
   text-transform: uppercase;
-  background: linear-gradient(90deg, 
-    rgba(var(--v-theme-primary), 0.08) 0%, 
-    transparent 100%);
-  border-bottom: 1px solid rgba(var(--v-theme-primary), 0.1);
+  background: transparent;
+  border-bottom: none;
 }
 
 /* Mobile-specific title styling */
@@ -451,9 +449,7 @@ onUnmounted(() => {
 }
 
 .widget-title-edit {
-  background: linear-gradient(90deg, 
-    rgba(var(--v-theme-primary), 0.15) 0%, 
-    rgba(var(--v-theme-secondary), 0.08) 100%);
+  background: rgba(var(--v-theme-primary), 0.1);
 }
 
 .widget-content {

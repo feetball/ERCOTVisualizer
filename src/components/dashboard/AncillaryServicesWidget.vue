@@ -155,10 +155,7 @@ function getSparklineOptions(color: string) {
 }
 
 function formatValue(val: number): string {
-  if (val >= 1000) {
-    return (val / 1000).toFixed(1) + 'k'
-  }
-  return val.toFixed(0)
+  return Math.round(val).toLocaleString()
 }
 
 async function fetchData() {
