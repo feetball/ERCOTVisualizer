@@ -90,34 +90,20 @@ const chartOptions = computed(() => ({
   xaxis: {
     type: 'datetime',
     labels: {
-      datetimeUTC: false,
-      style: {
-        colors: 'rgba(255,255,255,0.6)',
-        fontSize: '10px'
-      }
+      show: false,
+      datetimeUTC: false
     },
     axisBorder: {
-      show: true,
-      color: 'rgba(255,255,255,0.1)'
+      show: false
     },
     axisTicks: {
-      color: 'rgba(255,255,255,0.1)'
+      show: false
     }
   },
   yaxis: {
     labels: {
-      formatter: (val: number) => {
-        if (val === null || val === undefined) return ''
-        // Hz gets 2 decimals, MW/other gets 0 decimals
-        if (isHz.value) {
-          return val.toFixed(2)
-        }
-        return Math.round(val).toLocaleString()
-      },
-      style: {
-        colors: 'rgba(255,255,255,0.6)',
-        fontSize: '10px'
-      }
+      show: false,
+      formatter: () => ''
     }
   },
   tooltip: {
