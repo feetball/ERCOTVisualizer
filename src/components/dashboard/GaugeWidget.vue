@@ -69,7 +69,15 @@ const gaugeOptions = computed(() => ({
   chart: {
     type: 'radialBar',
     offsetY: -10,
-    sparkline: { enabled: true }
+    sparkline: { enabled: true },
+    dropShadow: {
+      enabled: true,
+      top: 0,
+      left: 0,
+      blur: 15,
+      color: gaugeColor.value,
+      opacity: 0.4
+    }
   },
   plotOptions: {
     radialBar: {
@@ -77,40 +85,75 @@ const gaugeOptions = computed(() => ({
       endAngle: 135,
       hollow: {
         margin: 0,
-        size: '70%',
-        background: 'transparent'
+        size: '65%',
+        background: 'transparent',
+        dropShadow: {
+          enabled: true,
+          top: 3,
+          left: 0,
+          blur: 10,
+          opacity: 0.3
+        }
       },
       track: {
-        background: '#333',
+        background: 'rgba(255,255,255,0.1)',
         strokeWidth: '100%',
-        margin: 5
+        margin: 5,
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
       },
       dataLabels: {
         name: {
           show: true,
-          fontSize: '12px',
-          color: '#888',
-          offsetY: 60
+          fontSize: '11px',
+          color: 'rgba(255,255,255,0.6)',
+          offsetY: 55,
+          fontWeight: 500
         },
         value: {
           show: true,
-          fontSize: '24px',
+          fontSize: '22px',
+          fontWeight: 700,
           color: props.styleConfig?.valueColor || '#fff',
-          offsetY: 0,
-          formatter: () => displayValue.value + (props.config?.unit ? ' ' + props.config.unit : '')
+          offsetY: -5,
+          formatter: () => displayValue.value + (props.config?.unit ? props.config.unit : '')
         }
       }
     }
   },
   fill: {
-    type: 'solid',
-    colors: [gaugeColor.value]
+    type: 'gradient',
+    gradient: {
+      shade: 'dark',
+      type: 'horizontal',
+      shadeIntensity: 0.5,
+      gradientToColors: [shiftColor(gaugeColor.value, 30)],
+      inverseColors: false,
+      opacityFrom: 1,
+      opacityTo: 1,
+      stops: [0, 100]
+    }
   },
   stroke: {
     lineCap: 'round'
   },
   labels: [props.config?.label || '']
 }))
+
+// Helper to shift color brightness
+function shiftColor(hex: string, percent: number): string {
+  const num = parseInt(hex.replace('#', ''), 16)
+  const amt = Math.round(2.55 * percent)
+  const R = Math.min(255, Math.max(0, (num >> 16) + amt))
+  const G = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amt))
+  const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt))
+  return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)
+}
 
 async function fetchData() {
   if (!props.config?.tag) return
@@ -139,5 +182,26 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+/* Add subtle glow effect */
+.gauge-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  height: 60%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, 
+    rgba(var(--v-theme-primary), 0.1) 0%, 
+    transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gauge-container :deep(.apexcharts-radialbar) {
+  filter: drop-shadow(0 0 8px rgba(var(--v-theme-primary), 0.3));
 }
 </style>

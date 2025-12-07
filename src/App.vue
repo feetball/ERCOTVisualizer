@@ -200,4 +200,55 @@ function deleteView() {
   pointer-events: none;
   font-family: monospace;
 }
+
+/* Enhanced app bar gradient */
+:deep(.v-app-bar) {
+  background: linear-gradient(90deg, 
+    rgba(var(--v-theme-primary), 0.95) 0%, 
+    rgba(var(--v-theme-primary-darken-1), 1) 50%,
+    rgba(var(--v-theme-primary), 0.95) 100%) !important;
+  border-bottom: 1px solid rgba(var(--v-theme-secondary), 0.3);
+  box-shadow: 
+    0 2px 20px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(var(--v-theme-primary), 0.2) !important;
+}
+
+:deep(.v-app-bar-title) {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation drawer styling */
+:deep(.v-navigation-drawer) {
+  background: linear-gradient(180deg, 
+    rgba(var(--v-theme-surface), 0.98) 0%, 
+    rgba(var(--v-theme-background), 1) 100%) !important;
+  border-right: 1px solid rgba(var(--v-theme-primary), 0.2) !important;
+}
+
+:deep(.v-navigation-drawer .v-list-item:hover) {
+  background: linear-gradient(90deg, 
+    rgba(var(--v-theme-primary), 0.1) 0%, 
+    transparent 100%);
+}
+
+:deep(.v-navigation-drawer .v-list-item--active) {
+  background: linear-gradient(90deg, 
+    rgba(var(--v-theme-primary), 0.2) 0%, 
+    rgba(var(--v-theme-secondary), 0.1) 100%);
+  border-left: 3px solid rgb(var(--v-theme-primary));
+}
+
+/* Dialog styling */
+:deep(.v-dialog .v-card) {
+  background: linear-gradient(145deg, 
+    rgba(var(--v-theme-surface), 0.98) 0%, 
+    rgba(var(--v-theme-surface-bright), 0.95) 100%) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.2);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(var(--v-theme-primary), 0.1) !important;
+}
 </style>

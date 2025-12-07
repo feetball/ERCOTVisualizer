@@ -41,14 +41,57 @@ const chartOptions = computed(() => ({
   chart: {
     id: `chart-${props.config?.tag}`,
     toolbar: { show: false },
-    animations: { enabled: false },
-    background: props.styleConfig?.backgroundColor || 'transparent'
+    animations: { 
+      enabled: true,
+      easing: 'easeinout',
+      speed: 500,
+      animateGradually: {
+        enabled: true,
+        delay: 150
+      },
+      dynamicAnimation: {
+        enabled: true,
+        speed: 350
+      }
+    },
+    background: 'transparent',
+    dropShadow: {
+      enabled: true,
+      top: 3,
+      left: 0,
+      blur: 10,
+      color: lineColor.value,
+      opacity: 0.25
+    }
   },
   colors: [lineColor.value],
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'dark',
+      type: 'vertical',
+      shadeIntensity: 0.5,
+      gradientToColors: ['transparent'],
+      opacityFrom: 0.4,
+      opacityTo: 0.05,
+      stops: [0, 100]
+    }
+  },
   xaxis: {
     type: 'datetime',
     labels: {
-      datetimeUTC: false
+      datetimeUTC: false,
+      style: {
+        colors: 'rgba(255,255,255,0.6)',
+        fontSize: '10px'
+      }
+    },
+    axisBorder: {
+      show: true,
+      color: 'rgba(255,255,255,0.1)'
+    },
+    axisTicks: {
+      color: 'rgba(255,255,255,0.1)'
     }
   },
   yaxis: {
@@ -60,10 +103,15 @@ const chartOptions = computed(() => ({
           return val.toFixed(2)
         }
         return Math.round(val).toLocaleString()
+      },
+      style: {
+        colors: 'rgba(255,255,255,0.6)',
+        fontSize: '10px'
       }
     }
   },
   tooltip: {
+    theme: 'dark',
     y: {
       formatter: (val: number) => {
         if (val === null || val === undefined) return ''
@@ -76,13 +124,27 @@ const chartOptions = computed(() => ({
   },
   stroke: {
     curve: 'smooth',
-    width: 2
+    width: 2.5,
+    lineCap: 'round'
   },
   theme: {
     mode: 'dark'
   },
   grid: {
-    borderColor: '#333'
+    borderColor: 'rgba(255,255,255,0.07)',
+    strokeDashArray: 4,
+    xaxis: {
+      lines: {
+        show: false
+      }
+    }
+  },
+  markers: {
+    size: 0,
+    hover: {
+      size: 6,
+      sizeOffset: 3
+    }
   }
 }))
 
@@ -139,5 +201,23 @@ watch(
 .chart-wrapper {
   width: 100%;
   height: 100%;
+  position: relative;
+}
+
+/* Subtle glow effect around chart */
+.chart-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 10%;
+  background: radial-gradient(ellipse at center, 
+    rgba(var(--v-theme-primary), 0.05) 0%, 
+    transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chart-wrapper :deep(.apexcharts-canvas) {
+  position: relative;
+  z-index: 1;
 }
 </style>

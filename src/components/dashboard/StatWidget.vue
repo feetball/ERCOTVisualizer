@@ -210,9 +210,24 @@ onUnmounted(() => {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: 4px;
+  padding: 8px;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
+}
+
+/* Subtle animated gradient background */
+.stat-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at 50% 0%, 
+    rgba(var(--v-theme-primary), 0.05) 0%, 
+    transparent 70%);
+  pointer-events: none;
 }
 
 .stat-content {
@@ -222,27 +237,48 @@ onUnmounted(() => {
   justify-content: center;
   flex: 1;
   min-height: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .stat-value {
-  font-weight: 700;
-  line-height: 1.1;
+  font-weight: 800;
+  line-height: 1;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  text-shadow: 0 0 30px currentColor;
+  letter-spacing: -0.02em;
+  animation: value-glow 3s ease-in-out infinite;
+}
+
+@keyframes value-glow {
+  0%, 100% {
+    text-shadow: 0 0 20px currentColor, 0 0 40px rgba(var(--v-theme-primary), 0.3);
+    opacity: 1;
+  }
+  50% {
+    text-shadow: 0 0 30px currentColor, 0 0 60px rgba(var(--v-theme-primary), 0.5);
+    opacity: 0.95;
+  }
 }
 
 .trend-row {
   display: flex;
   align-items: center;
-  gap: 2px;
-  margin-top: 2px;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(currentColor, 0.1);
+  backdrop-filter: blur(4px);
 }
 
 .trend-text {
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .sparkline-area {
@@ -250,5 +286,29 @@ onUnmounted(() => {
   min-height: 30px;
   max-height: 50%;
   width: 100%;
+  position: relative;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* Mobile optimizations */
+@media (max-width: 599px) {
+  .stat-container {
+    padding: 12px;
+  }
+  
+  .stat-value {
+    letter-spacing: -0.01em;
+  }
+  
+  .trend-row {
+    margin-top: 8px;
+    padding: 6px 14px;
+  }
+  
+  .sparkline-area {
+    flex: 0 0 30%;
+    min-height: 40px;
+  }
 }
 </style>

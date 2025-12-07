@@ -54,14 +54,40 @@ const chartOptions = computed(() => ({
     type: 'area',
     stacked: true,
     toolbar: { show: false },
-    animations: { enabled: false },
-    background: props.styleConfig?.backgroundColor || 'transparent'
+    animations: { 
+      enabled: true,
+      easing: 'easeinout',
+      speed: 600,
+      animateGradually: {
+        enabled: true,
+        delay: 100
+      }
+    },
+    background: 'transparent',
+    dropShadow: {
+      enabled: true,
+      top: 0,
+      left: 0,
+      blur: 8,
+      opacity: 0.2
+    }
   },
-  colors: props.config?.tags?.map((t: TagConfig) => t.color) || ['#1867C0'],
+  colors: props.config?.tags?.map((t: TagConfig) => t.color) || ['#00E676'],
   xaxis: {
     type: 'datetime',
     labels: {
-      datetimeUTC: false
+      datetimeUTC: false,
+      style: {
+        colors: 'rgba(255,255,255,0.6)',
+        fontSize: '10px'
+      }
+    },
+    axisBorder: {
+      show: true,
+      color: 'rgba(255,255,255,0.1)'
+    },
+    axisTicks: {
+      color: 'rgba(255,255,255,0.1)'
     }
   },
   yaxis: {
@@ -72,29 +98,58 @@ const chartOptions = computed(() => ({
         if (isHz.value) {
           return val.toFixed(2)
         }
+        if (Math.abs(val) >= 1000) {
+          return (val / 1000).toFixed(0) + 'K'
+        }
         return Math.round(val).toLocaleString()
+      },
+      style: {
+        colors: 'rgba(255,255,255,0.6)',
+        fontSize: '10px'
       }
     },
     title: {
-      text: props.config?.unit || ''
+      text: props.config?.unit || '',
+      style: {
+        color: 'rgba(255,255,255,0.5)',
+        fontSize: '11px'
+      }
     }
   },
   stroke: {
     curve: 'smooth',
-    width: 1
+    width: 2
   },
   fill: {
-    type: 'solid',
-    opacity: 0.8
+    type: 'gradient',
+    gradient: {
+      shadeIntensity: 0.4,
+      opacityFrom: 0.9,
+      opacityTo: 0.6,
+      stops: [0, 90, 100]
+    }
   },
   legend: {
     position: 'top',
     horizontalAlign: 'center',
+    floating: false,
+    fontSize: '11px',
+    fontWeight: 500,
     labels: {
-      colors: '#999'
+      colors: 'rgba(255,255,255,0.8)'
+    },
+    markers: {
+      width: 10,
+      height: 10,
+      radius: 3
+    },
+    itemMargin: {
+      horizontal: 8,
+      vertical: 2
     }
   },
   tooltip: {
+    theme: 'dark',
     y: {
       formatter: (val: number) => {
         if (val === null || val === undefined) return ''
@@ -109,7 +164,13 @@ const chartOptions = computed(() => ({
     mode: 'dark'
   },
   grid: {
-    borderColor: '#333'
+    borderColor: 'rgba(255,255,255,0.07)',
+    strokeDashArray: 4,
+    xaxis: {
+      lines: {
+        show: false
+      }
+    }
   },
   dataLabels: {
     enabled: false
@@ -174,5 +235,27 @@ watch(
 .chart-wrapper {
   width: 100%;
   height: 100%;
+  position: relative;
+}
+
+/* Ambient glow */
+.chart-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 5%;
+  background: radial-gradient(ellipse at 50% 80%, 
+    rgba(var(--v-theme-primary), 0.08) 0%, 
+    transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chart-wrapper :deep(.apexcharts-canvas) {
+  position: relative;
+  z-index: 1;
+}
+
+.chart-wrapper :deep(.apexcharts-legend) {
+  padding: 4px 8px !important;
 }
 </style>
