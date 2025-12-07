@@ -6,6 +6,7 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import VueApexCharts from 'vue3-apexcharts'
 import './style.css'
+import './styles/colors.css'
 
 const app = createApp(App)
 

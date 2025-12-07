@@ -49,6 +49,9 @@
             <v-list-item @click="addWidget('ancillary')" prepend-icon="mdi-table-row">
               <v-list-item-title>Ancillary Services</v-list-item-title>
             </v-list-item>
+            <v-list-item @click="addWidget('alert')" prepend-icon="mdi-alert-circle">
+              <v-list-item-title>Alert Indicator</v-list-item-title>
+            </v-list-item>
           </v-list>
         </v-menu>
         
@@ -200,6 +203,10 @@ const AncillaryServicesWidget = defineAsyncComponent({
   loader: () => import('@/components/dashboard/AncillaryServicesWidget.vue'),
   onError: (error) => console.error('Failed to load AncillaryServicesWidget:', error)
 })
+const AlertWidget = defineAsyncComponent({
+  loader: () => import('@/components/dashboard/AlertWidget.vue'),
+  onError: (error) => console.error('Failed to load AlertWidget:', error)
+})
 
 // Responsive breakpoints
 const { xs, sm, md, lg, height } = useDisplay()
@@ -288,6 +295,7 @@ function getWidgetComponent(type: string) {
     case 'stat': return StatWidget
     case 'gauge': return GaugeWidget
     case 'ancillary': return AncillaryServicesWidget
+    case 'alert': return AlertWidget
     default: return ChartWidget
   }
 }

@@ -235,7 +235,10 @@ watch(
 .chart-wrapper {
   width: 100%;
   height: 100%;
+  min-height: 100px;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Ambient glow */
@@ -253,6 +256,11 @@ watch(
 .chart-wrapper :deep(.apexcharts-canvas) {
   position: relative;
   z-index: 1;
+}
+
+.chart-wrapper :deep(.vue-apexcharts) {
+  flex: 1;
+  min-height: 0;
 }
 
 .chart-wrapper :deep(.apexcharts-legend) {

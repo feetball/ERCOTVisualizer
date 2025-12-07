@@ -1,13 +1,17 @@
 <template>
   <div class="fill-height chart-wrapper" ref="chartContainer">
     <apexchart 
-      v-if="chartHeight > 0"
+      v-if="chartHeight > 0 && series.length > 0 && series[0].data.length > 0"
       width="100%" 
       :height="chartHeight" 
       type="area" 
       :options="chartOptions" 
       :series="series"
+      :key="chartKey"
     ></apexchart>
+    <div v-else class="d-flex align-center justify-center fill-height">
+      <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+    </div>
   </div>
 </template>
 
@@ -16,6 +20,7 @@ import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { dataService } from '@/services/dataService'
 import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
 import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
+import { COLORS } from '@/styles/colors'
 
 interface DataPoint {
   Timestamp: string
@@ -34,11 +39,13 @@ const props = defineProps<{
 
 const chartContainer = ref<HTMLElement | null>(null)
 const chartHeight = ref(0)
+const chartKey = ref(0)
 const series = ref<{ name: string; data: ChartDataPoint[] }[]>([])
 let intervalId: ReturnType<typeof setInterval> | null = null
 let resizeObserver: ResizeObserver | null = null
 
-const lineColor = computed(() => props.styleConfig?.valueColor || '#1867C0')
+const defaultColor = props.styleConfig?.valueColor || COLORS.DEMAND
+const lineColor = ref(defaultColor)
 
 // Determine if this is a Hz chart (for decimal formatting)
 const isHz = computed(() => {
@@ -46,6 +53,12 @@ const isHz = computed(() => {
   const unit = props.config?.unit || ''
   return tag.includes('FREQ') || unit.toLowerCase().includes('hz')
 })
+
+function formatValue(val: number, unit: string | undefined, decimals: number) {
+  const fixed = val.toFixed(decimals)
+  if (unit === '$') return `$${fixed}`
+  return unit ? `${fixed} ${unit}` : fixed
+}
 
 const chartOptions = computed(() => ({
   chart: {
@@ -84,7 +97,7 @@ const chartOptions = computed(() => ({
       shade: 'dark',
       type: 'vertical',
       shadeIntensity: 0.5,
-      gradientToColors: ['transparent'],
+      gradientToColors: [lineColor.value],
       opacityFrom: 0.4,
       opacityTo: 0.05,
       stops: [0, 100]
@@ -111,11 +124,9 @@ const chartOptions = computed(() => ({
     labels: {
       formatter: (val: number) => {
         if (val === null || val === undefined) return ''
-        // Hz gets 2 decimals, MW/other gets 0 decimals
-        if (isHz.value) {
-          return val.toFixed(2)
-        }
-        return Math.round(val).toLocaleString()
+        const unit = props.config?.unit || (isHz.value ? 'Hz' : 'MW')
+        const decimals = props.config?.decimals ?? (isHz.value ? 2 : 0)
+        return formatValue(val, unit, decimals)
       },
       style: {
         colors: 'rgba(255,255,255,0.6)',
@@ -128,10 +139,9 @@ const chartOptions = computed(() => ({
     y: {
       formatter: (val: number) => {
         if (val === null || val === undefined) return ''
-        if (isHz.value) {
-          return val.toFixed(2) + ' Hz'
-        }
-        return Math.round(val).toLocaleString() + ' MW'
+        const unit = props.config?.unit || (isHz.value ? 'Hz' : 'MW')
+        const decimals = props.config?.decimals ?? (isHz.value ? 2 : 0)
+        return formatValue(val, unit, decimals)
       }
     }
   },
@@ -182,11 +192,27 @@ async function fetchData() {
       x: new Date(d.Timestamp).getTime(), 
       y: safeCalculate(d.Value, props.config.calculation)
     }))
+    const lastValue = processedData.length > 0 ? processedData[processedData.length - 1].y : undefined
+
+    if (props.config?.tag?.includes('SYSTEM_LOAD') && typeof lastValue === 'number') {
+      if (lastValue >= 50000) {
+        lineColor.value = COLORS.DEMAND_HIGH
+      } else if (lastValue >= 45000) {
+        lineColor.value = COLORS.DEMAND_MEDIUM
+      } else {
+        lineColor.value = COLORS.DEMAND_LOW
+      }
+    } else {
+      lineColor.value = defaultColor
+    }
     
     series.value = [{
       name: props.config.tag,
       data: processedData
     }]
+    
+    // Force chart re-render with new data
+    chartKey.value++
   } catch (error) {
     console.error('Error fetching chart data:', error)
   }
@@ -197,11 +223,26 @@ onMounted(() => {
   if (chartContainer.value) {
     resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        chartHeight.value = entry.contentRect.height
+        const height = entry.contentRect.height
+        if (height > 0) {
+          chartHeight.value = height
+        }
       }
     })
     resizeObserver.observe(chartContainer.value)
-    chartHeight.value = chartContainer.value.offsetHeight
+    
+    // Get initial height - use requestAnimationFrame to ensure layout is complete
+    requestAnimationFrame(() => {
+      if (chartContainer.value) {
+        const height = chartContainer.value.offsetHeight || chartContainer.value.clientHeight
+        if (height > 0) {
+          chartHeight.value = height
+        } else {
+          // Fallback: set a minimum height if container has no height yet
+          chartHeight.value = 200
+        }
+      }
+    })
   }
   
   fetchData()
@@ -226,7 +267,10 @@ watch(
 .chart-wrapper {
   width: 100%;
   height: 100%;
+  min-height: 100px;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Subtle glow effect around chart */
@@ -244,5 +288,10 @@ watch(
 .chart-wrapper :deep(.apexcharts-canvas) {
   position: relative;
   z-index: 1;
+}
+
+.chart-wrapper :deep(.vue-apexcharts) {
+  flex: 1;
+  min-height: 0;
 }
 </style>

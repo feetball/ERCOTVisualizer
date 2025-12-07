@@ -1,0 +1,33 @@
+/**
+ * Global Color Definitions
+ * Centralized color palette for OpsTools3 / ERCOT Visualizer
+ */
+
+:root {
+  /* Fuel Type / Generation Colors */
+  --color-mw: #6dcc84;           /* MW - Green */
+  --color-solar: #cf6a20;        /* Solar - Orange */
+  --color-wind: #2f67af;         /* Wind - Blue */
+  --color-hydro: #4a97ad;        /* Hydro - Teal/Cyan */
+  --color-natural-gas: #4d4b98;  /* Natural Gas - Purple */
+  --color-coal: #183a62;         /* Coal - Dark Blue */
+  --color-nuclear: #ecca3e;      /* Nuclear - Yellow/Gold */
+  --color-storage: #ecca3e;      /* ESR/Storage - Yellow/Gold */
+  --color-other: #808080;        /* Other - Grey */
+
+  /* Metrics & Indicators Colors */
+  --color-demand: #5ab3c3;       /* Demand - Cyan */
+  --color-frequency: #5ab3c3;    /* Frequency - Cyan */
+  --color-ancillary: #6552a2;    /* Ancillary Services - Purple */
+
+  /* Additional Utility Colors */
+  --color-capacity: #26A69A;     /* Capacity - Teal */
+  --color-reserves: #7E57C2;     /* Reserves - Purple */
+  --color-price: #FFB300;        /* Price - Amber */
+  --color-alert: #FF5252;        /* Alerts - Red */
+
+  /* Demand Severity Thresholds */
+  --color-demand-high: #FF5252;    /* High demand (>=50k) - Red */
+  --color-demand-medium: #FFB300;  /* Medium demand (45-50k) - Amber */
+  --color-demand-low: #4DB848;     /* Low demand (<45k) - Green */
+}

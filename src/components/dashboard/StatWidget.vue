@@ -69,7 +69,11 @@ const formattedValue = computed(() => {
   
   // Append unit if provided
   if (props.config?.unit) {
-    formatted += ' ' + props.config.unit
+    if (props.config.unit.trim() === '$') {
+      formatted = '$' + formatted
+    } else {
+      formatted += ' ' + props.config.unit
+    }
   }
   
   return formatted

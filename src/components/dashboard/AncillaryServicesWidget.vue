@@ -27,6 +27,7 @@ import VueApexCharts from 'vue3-apexcharts'
 import { dataService } from '@/services/dataService'
 import { WIDGET_REFRESH_INTERVAL } from '@/types/widget'
 import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
+import { COLORS as GLOBAL_COLORS } from '@/styles/colors'
 
 const apexchart = VueApexCharts
 
@@ -44,12 +45,13 @@ const props = defineProps<{
   styleConfig?: WidgetStyle
 }>()
 
-// ERCOT-style colors for ancillary services
+// Ancillary service colors - using global ancillary color as base
+const ANCILLARY_COLOR = GLOBAL_COLORS.ANCILLARY
 const COLORS = {
   regUp: '#00BCD4',      // Cyan for Reg-Up
   regDown: '#FF9800',    // Orange for Reg-Down
   rrs: '#4CAF50',        // Green for RRS
-  nonSpin: '#9C27B0',    // Purple for Non-Spin
+  nonSpin: ANCILLARY_COLOR,  // Global ancillary color for Non-Spin
   ecrs: '#2196F3'        // Blue for ECRS
 }
 

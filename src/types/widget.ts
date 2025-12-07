@@ -56,6 +56,16 @@ export interface WidgetConfig {
   calculation?: string
   min?: number
   max?: number
+  showLabel?: boolean
+  thresholds?: AlertThreshold[]
+  invertLogic?: boolean
+}
+
+/** Alert threshold configuration */
+export interface AlertThreshold {
+  level: 'normal' | 'caution' | 'warning' | 'alert'
+  min?: number
+  max?: number
 }
 
 /** Widget styling options */
@@ -67,7 +77,7 @@ export interface WidgetStyle {
 }
 
 /** Widget types supported by the application */
-export type WidgetType = 'chart' | 'value' | 'stat' | 'gauge' | 'table' | 'stacked' | 'ancillary'
+export type WidgetType = 'chart' | 'value' | 'stat' | 'gauge' | 'table' | 'stacked' | 'ancillary' | 'alert'
 
 /** Layout item for grid-layout-plus */
 export interface LayoutItem {
