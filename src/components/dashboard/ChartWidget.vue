@@ -74,6 +74,9 @@ const chartOptions = computed(() => ({
       opacity: 0.25
     }
   },
+  dataLabels: {
+    enabled: false
+  },
   colors: [lineColor.value],
   fill: {
     type: 'gradient',
@@ -90,20 +93,34 @@ const chartOptions = computed(() => ({
   xaxis: {
     type: 'datetime',
     labels: {
-      show: false,
-      datetimeUTC: false
+      datetimeUTC: false,
+      style: {
+        colors: 'rgba(255,255,255,0.6)',
+        fontSize: '10px'
+      }
     },
     axisBorder: {
-      show: false
+      show: true,
+      color: 'rgba(255,255,255,0.1)'
     },
     axisTicks: {
-      show: false
+      color: 'rgba(255,255,255,0.1)'
     }
   },
   yaxis: {
     labels: {
-      show: false,
-      formatter: () => ''
+      formatter: (val: number) => {
+        if (val === null || val === undefined) return ''
+        // Hz gets 2 decimals, MW/other gets 0 decimals
+        if (isHz.value) {
+          return val.toFixed(2)
+        }
+        return Math.round(val).toLocaleString()
+      },
+      style: {
+        colors: 'rgba(255,255,255,0.6)',
+        fontSize: '10px'
+      }
     }
   },
   tooltip: {
