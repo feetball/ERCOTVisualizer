@@ -158,7 +158,7 @@ const GaugeWidget = defineAsyncComponent(() => import('@/components/dashboard/Ga
 const StackedChartWidget = defineAsyncComponent(() => import('@/components/dashboard/StackedChartWidget.vue'))
 
 // Responsive breakpoints
-const { xs, sm, md, lg, xlAndUp, width, height } = useDisplay()
+const { xs, sm, md, lg, height } = useDisplay()
 
 // Edit mode state
 const editMode = ref(false)

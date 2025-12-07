@@ -67,6 +67,64 @@ helm install ercot-visualizer ./charts/ercot-visualizer
 helm install ercot-visualizer ./charts/ercot-visualizer -f my-values.yaml
 ```
 
+### Vercel Deployment
+
+Vercel can deploy this app directly from GitHub.
+
+#### Manual Deployment (Vercel Dashboard)
+
+1. Import repository https://github.com/feetball/ERCOTVisualizer
+2. Configure project:
+   - Build Command: `npm run build` (auto-detected)
+   - Output Directory: `dist`
+   - Framework Preset: `Vite`
+3. Add Environment Variables (Dashboard → Settings → Environment Variables):
+   - `VITE_USE_MOCK_DATA` = `true` (or `false` for real PI API)
+   - `VITE_PI_WEB_API_URL` = `https://your-pi-server/piwebapi` (only if mock=false)
+4. Deploy
+
+#### CLI Deployment
+
+```bash
+npm i -g vercel
+vercel login
+vercel --prod
+```
+
+#### Automated GitHub Actions Deployment
+
+The repository includes a GitHub Action workflow (`.github/workflows/vercel-deploy.yml`) that automatically deploys to Vercel on push/PR.
+
+**Setup:**
+
+1. Install Vercel CLI and link your project:
+   ```bash
+   npm i -g vercel
+   vercel login
+   vercel link
+   ```
+
+2. Get your Vercel credentials:
+   ```bash
+   # Get your Vercel token from https://vercel.com/account/tokens
+   # Get org and project IDs:
+   cat .vercel/project.json
+   ```
+
+3. Add GitHub Secrets (Repository → Settings → Secrets and variables → Actions):
+   - `VERCEL_TOKEN` - Your Vercel API token
+   - `VERCEL_ORG_ID` - From `.vercel/project.json`
+   - `VERCEL_PROJECT_ID` - From `.vercel/project.json`
+
+4. Push to main branch or create a PR - automatic deployment will trigger
+
+**Environment Variables:**
+
+Set these in Vercel Dashboard (not GitHub Secrets):
+- Production: `VITE_USE_MOCK_DATA=true`
+- Preview: `VITE_USE_MOCK_DATA=true`
+
+
 ## Project Structure
 
 ```

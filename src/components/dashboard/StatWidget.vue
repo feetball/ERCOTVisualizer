@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { dataService } from '@/services/dataService'
 
 const props = defineProps<{

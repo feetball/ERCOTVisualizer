@@ -1,6 +1,6 @@
 import { piService } from './piWebAPI'
 import { mockPiService } from './mockPiService'
-import { ercotService, ERCOT_TAGS } from './ercotService'
+import { ercotService } from './ercotService'
 
 // Data source options:
 // - 'ercot': Realistic ERCOT grid simulation (default for development)

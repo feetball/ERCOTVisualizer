@@ -270,14 +270,14 @@ function generateSolarGeneration(time: Date): number {
 }
 
 // Generate gas generation (fills the gap)
-function generateGasGeneration(time: Date, demand: number, wind: number, solar: number, nuclear: number, coal: number): number {
-  // Gas is the balancing fuel - fills gap between demand and other sources
+function generateGasGeneration(demand: number, wind: number, solar: number, nuclear: number, coal: number): number {
+  // Gas is the balancing fuel - fills the gap between demand and other sources
   const otherGen = wind + solar + nuclear + coal
   const needed = demand - otherGen
-  
+
   // Add some realistic gas dynamics
   const noise = (Math.random() - 0.5) * 1000
-  
+
   return Math.max(8000, Math.min(67998, needed + noise))
 }
 
@@ -384,7 +384,7 @@ function generateValueForTag(tagId: string, time: Date): number {
       const solar = generateSolarGeneration(time)
       const nuclear = generateNuclearGeneration(time)
       const coal = generateCoalGeneration(time)
-      return generateGasGeneration(time, demand, wind, solar, nuclear, coal)
+      return generateGasGeneration(demand, wind, solar, nuclear, coal)
     }
     
     case 'ERCOT.NUCLEAR_GEN':
