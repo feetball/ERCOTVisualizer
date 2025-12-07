@@ -139,7 +139,7 @@ const iconColor = computed(() => {
 })
 
 const iconSize = computed(() => {
-  return 24 // Icon size inside the indicator circle
+  return 40 // Larger icon size for visibility
 })
 
 const alertLabel = computed(() => {
@@ -183,24 +183,27 @@ onUnmounted(() => {
 
 <style scoped>
 .alert-widget {
-  padding: 8px;
+  padding: 6px;
   border-radius: 4px;
-  transition: all 0.3s ease;
-  gap: 4px;
+  transition: all 0.25s ease;
+  gap: 6px;
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .alert-indicator {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 0 12px currentColor;
-  animation: pulse-glow 2s ease-in-out infinite;
+  box-shadow: 0 0 18px currentColor;
+  animation: pulse-glow 1.8s ease-in-out infinite;
 }
 
 .alert-normal .alert-indicator {
@@ -242,19 +245,20 @@ onUnmounted(() => {
 }
 
 .alert-value {
-  font-size: 1.1rem;
+  font-size: 1.8rem;
   font-family: 'Roboto Mono', monospace;
-  font-weight: 700;
-  line-height: 1.2;
-  text-shadow: 0 0 10px currentColor;
+  font-weight: 800;
+  line-height: 1.05;
+  text-shadow: 0 0 14px currentColor;
 }
 
 .alert-label {
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.9;
+  letter-spacing: 0.06em;
+  opacity: 0.95;
+  margin-top: 4px;
 }
 
 .alert-value {
