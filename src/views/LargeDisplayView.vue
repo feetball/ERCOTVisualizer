@@ -1,7 +1,7 @@
 <template>
   <div class="fill-height bg-black d-flex flex-column">
     <v-toolbar density="compact" color="grey-darken-4">
-      <v-toolbar-title>Wallboard Controller</v-toolbar-title>
+      <v-toolbar-title>Large Display Controller</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn prepend-icon="mdi-plus" @click="addDashboard">Add Dashboard</v-btn>
     </v-toolbar>

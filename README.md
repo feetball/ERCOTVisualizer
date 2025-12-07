@@ -5,7 +5,7 @@ Real-time ERCOT grid monitoring dashboard built with Vue 3, Vuetify, and ApexCha
 ## Features
 
 - **Real-time Grid Data**: Simulated ERCOT grid data including frequency, demand, generation by fuel type
-- **Responsive Design**: Works on mobile devices, desktops, and large wallboard displays
+- **Responsive Design**: Works on mobile devices, desktops, and large displays
 - **Drag-and-Drop Widgets**: Customizable dashboard layout with stat, gauge, chart, and stacked chart widgets
 - **Edit Mode**: Toggle edit mode to add, remove, or rearrange widgets
 - **Dark/Light Theme**: Toggle between dark and light themes

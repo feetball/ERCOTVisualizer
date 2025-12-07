@@ -13,7 +13,13 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue'
-import type { Widget } from '@/stores/dashboard'
+
+interface Widget {
+  i: string
+  type: string
+  title: string
+  config: Record<string, unknown>
+}
 
 const props = defineProps<{
   widget: Widget

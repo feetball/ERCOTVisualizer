@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import SystemSummaryView from '../SystemSummaryView.vue'
+import GridSummaryView from '../GridSummaryView.vue'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -10,9 +10,9 @@ const vuetify = createVuetify({
   directives,
 })
 
-describe('SystemSummaryView', () => {
+describe('GridSummaryView', () => {
   it('renders frequency and load charts', () => {
-    const wrapper = mount(SystemSummaryView, {
+    const wrapper = mount(GridSummaryView, {
       global: {
         plugins: [vuetify]
       }
