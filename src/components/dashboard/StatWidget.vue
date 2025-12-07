@@ -79,28 +79,35 @@ const formattedValue = computed(() => {
 
 // Auto-scaling font size based on container width
 const valueFontSize = computed(() => {
-  // Scale based on container width, with reasonable bounds
-  // Guard against zero dimensions
+  // Scale based on container width/height and value length for responsive sizing
   const width = containerWidth.value || 200
   const height = containerHeight.value || 150
-  const baseSize = Math.min(width / 5, height / 3)
-  const clampedSize = Math.max(16, Math.min(baseSize, 120)) // Min 16px, max 120px
-  return `${clampedSize}px`
+  const text = formattedValue.value || ''
+  const len = Math.max(1, text.length)
+
+  // Heuristic: reserve more horizontal space for shorter values
+  const horizontalScale = width / (4 + len * 0.12)
+  const verticalScale = height / 2.8
+  const baseSize = Math.min(horizontalScale, verticalScale)
+
+  // Clamp to reasonable bounds
+  const clampedSize = Math.max(14, Math.min(baseSize, 140))
+  return `${Math.round(clampedSize)}px`
 })
 
 const trendFontSize = computed(() => {
   const width = containerWidth.value || 200
   const height = containerHeight.value || 150
-  const baseSize = Math.min(width / 12, height / 8)
-  const clampedSize = Math.max(10, Math.min(baseSize, 24))
-  return `${clampedSize}px`
+  const baseSize = Math.min(width / 14, height / 10)
+  const clampedSize = Math.max(9, Math.min(baseSize, 22))
+  return `${Math.round(clampedSize)}px`
 })
 
 const trendIconSize = computed(() => {
   const width = containerWidth.value || 200
   const height = containerHeight.value || 150
-  const baseSize = Math.min(width / 14, height / 10)
-  return Math.max(12, Math.min(baseSize, 20))
+  const baseSize = Math.min(width / 16, height / 12)
+  return Math.round(Math.max(12, Math.min(baseSize, 22)))
 })
 
 const valueStyle = computed(() => ({
