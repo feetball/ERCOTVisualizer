@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ercot-visualizer
+description: ERCOT Grid Visualizer - Real-time grid monitoring dashboard
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
