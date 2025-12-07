@@ -6,19 +6,21 @@
     </v-card-title>
     <v-divider></v-divider>
     <v-card-text class="flex-grow-1 pa-2" style="overflow: hidden;">
-      <component :is="componentType" :config="widget.config" />
+      <component :is="componentType" :config="widget.config" :style-config="widget.style" />
     </v-card-text>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, type Component } from 'vue'
+import type { WidgetConfig, WidgetStyle, WidgetType } from '@/types/widget'
 
 interface Widget {
   i: string
-  type: string
+  type: WidgetType
   title: string
-  config: Record<string, unknown>
+  config: WidgetConfig
+  style?: WidgetStyle
 }
 
 const props = defineProps<{
@@ -26,15 +28,26 @@ const props = defineProps<{
   isEditing: boolean
 }>()
 
-defineEmits(['remove'])
+defineEmits<{
+  remove: [id: string]
+}>()
 
+// Async load all widget components
 const ChartWidget = defineAsyncComponent(() => import('./ChartWidget.vue'))
 const ValueWidget = defineAsyncComponent(() => import('./ValueWidget.vue'))
+const StatWidget = defineAsyncComponent(() => import('./StatWidget.vue'))
+const GaugeWidget = defineAsyncComponent(() => import('./GaugeWidget.vue'))
+const TableWidget = defineAsyncComponent(() => import('./TableWidget.vue'))
+const StackedChartWidget = defineAsyncComponent(() => import('./StackedChartWidget.vue'))
 
-const componentType = computed(() => {
+const componentType = computed<Component | null>(() => {
   switch (props.widget.type) {
     case 'chart': return ChartWidget
     case 'value': return ValueWidget
+    case 'stat': return StatWidget
+    case 'gauge': return GaugeWidget
+    case 'table': return TableWidget
+    case 'stacked': return StackedChartWidget
     default: return null
   }
 })

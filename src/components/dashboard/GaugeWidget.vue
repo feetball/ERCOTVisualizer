@@ -13,14 +13,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { dataService } from '@/services/dataService'
+import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
+import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
 
 const props = defineProps<{
-  config: any
-  style?: any
+  config: BaseWidgetConfig
+  styleConfig?: WidgetStyle
 }>()
 
 const currentValue = ref<number | null>(null)
-let intervalId: any = null
+let intervalId: ReturnType<typeof setInterval> | null = null
 
 // Determine if this is Hz (for decimal formatting)
 const isHz = computed(() => {
@@ -29,21 +31,18 @@ const isHz = computed(() => {
   return tag.includes('FREQ') || unit.toLowerCase().includes('hz')
 })
 
+// Get min/max with safe defaults
+const min = computed(() => props.config?.min ?? 0)
+const max = computed(() => props.config?.max ?? 100)
+
 // Calculate percentage for gauge (0-100)
 const percentage = computed(() => {
   if (currentValue.value === null) return 0
-  let val = currentValue.value
-  if (props.config?.calculation) {
-    try {
-      const fn = new Function('value', props.config.calculation)
-      val = fn(val)
-    } catch (e) {
-      console.error('Calculation error:', e)
-    }
-  }
-  const min = props.config?.min ?? 0
-  const max = props.config?.max ?? 100
-  const pct = ((val - min) / (max - min)) * 100
+  const val = safeCalculate(currentValue.value, props.config.calculation)
+  const range = max.value - min.value
+  // Guard against division by zero
+  if (range === 0) return 50
+  const pct = ((val - min.value) / range) * 100
   return Math.max(0, Math.min(100, pct))
 })
 
@@ -51,25 +50,15 @@ const series = computed(() => [percentage.value])
 
 const displayValue = computed(() => {
   if (currentValue.value === null) return '---'
-  let val = currentValue.value
-  if (props.config?.calculation) {
-    try {
-      const fn = new Function('value', props.config.calculation)
-      val = fn(val)
-    } catch (e) {
-      console.error('Calculation error:', e)
-    }
-  }
+  const val = safeCalculate(currentValue.value, props.config.calculation)
   // Hz gets 2 decimals, MW gets 0 decimals
-  if (isHz.value) {
-    return val.toFixed(2)
-  }
-  return Math.round(val).toLocaleString()
+  const decimals = props.config?.decimals ?? (isHz.value ? 2 : 0)
+  return val.toFixed(decimals)
 })
 
 const gaugeColor = computed(() => {
   const pct = percentage.value
-  if (props.style?.valueColor) return props.style.valueColor
+  if (props.styleConfig?.valueColor) return props.styleConfig.valueColor
   // Default: green < 60, yellow 60-80, red > 80
   if (pct < 60) return '#4CAF50'
   if (pct < 80) return '#FFC107'
@@ -106,9 +95,9 @@ const gaugeOptions = computed(() => ({
         value: {
           show: true,
           fontSize: '24px',
-          color: props.style?.valueColor || '#fff',
+          color: props.styleConfig?.valueColor || '#fff',
           offsetY: 0,
-          formatter: () => displayValue.value + (props.config?.unit || '')
+          formatter: () => displayValue.value + (props.config?.unit ? ' ' + props.config.unit : '')
         }
       }
     }
@@ -135,7 +124,7 @@ async function fetchData() {
 
 onMounted(() => {
   fetchData()
-  intervalId = setInterval(fetchData, 5000)
+  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL)
 })
 
 onUnmounted(() => {

@@ -1,34 +1,16 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
+import type { LayoutItem, WidgetConfig, WidgetStyle, WidgetType } from '@/types/widget'
 
-export interface LayoutItem {
-  i: string
-  x: number
-  y: number
-  w: number
-  h: number
-  type: string
-  title: string
-  config: WidgetConfig
-  style?: WidgetStyle
-}
+// Re-export types for backwards compatibility
+export type { LayoutItem, WidgetConfig, WidgetStyle }
 
-export interface WidgetConfig {
-  tag?: string
-  tags?: Array<{ tag: string; name: string; color: string }>
-  durationHours?: number
-  unit?: string
-  decimals?: number
-  min?: number
-  max?: number
-}
-
-export interface WidgetStyle {
-  valueColor?: string
-  backgroundColor?: string
-  titleColor?: string
-  titleSize?: string
-}
-
+/**
+ * Composable for managing grid layout state
+ * 
+ * @param storageKey - localStorage key for persisting layout
+ * @param defaultLayout - Default layout to use if none saved
+ */
 export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
   const layout = ref<LayoutItem[]>([])
   const editMode = ref(false)
@@ -38,12 +20,27 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
   const lastRefresh = ref(new Date())
   const isRefreshing = ref(false)
   const refreshInterval = ref(5)
-  let statusCheckInterval: number | undefined
-  let refreshIntervalId: number | undefined
+  let statusCheckInterval: ReturnType<typeof setInterval> | undefined
+  let refreshIntervalId: ReturnType<typeof setInterval> | undefined
 
   const lastRefreshFormatted = computed(() => {
     return lastRefresh.value.toLocaleTimeString()
   })
+
+  // Debounced save to prevent excessive localStorage writes
+  const debouncedSave = useDebounceFn(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(layout.value))
+    } catch (error) {
+      console.error('Failed to save layout:', error)
+    }
+  }, 500)
+
+  // Watch for layout changes and auto-save (debounced)
+  watch(layout, () => {
+    if (!editMode.value) return // Only auto-save when not in edit mode
+    debouncedSave()
+  }, { deep: true })
 
   function toggleEditMode() {
     editMode.value = !editMode.value
@@ -64,7 +61,13 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
     const saved = localStorage.getItem(storageKey)
     if (saved) {
       try {
-        layout.value = JSON.parse(saved)
+        const parsed = JSON.parse(saved)
+        // Validate that parsed data is an array
+        if (Array.isArray(parsed)) {
+          layout.value = parsed
+        } else {
+          layout.value = [...defaultLayout.map(item => ({ ...item }))]
+        }
       } catch {
         layout.value = [...defaultLayout.map(item => ({ ...item }))]
       }
@@ -79,7 +82,7 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
     saveLayout()
   }
 
-  function addWidget(type: string) {
+  function addWidget(type: WidgetType) {
     editingWidget.value = {
       i: '',
       x: 0,
@@ -100,7 +103,7 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
   }
 
   function removeWidget(id: string) {
-    const idx = layout.value.findIndex((w: LayoutItem) => w.i === id)
+    const idx = layout.value.findIndex((w) => w.i === id)
     if (idx !== -1) {
       layout.value.splice(idx, 1)
       saveLayout()
@@ -109,14 +112,14 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
 
   function handleWidgetSave(data: {
     isEditing: boolean
-    type: string
+    type: WidgetType
     title: string
     config: WidgetConfig
     style: WidgetStyle
   }) {
     if (data.isEditing && editingWidget.value?.i) {
       // Update existing
-      const idx = layout.value.findIndex((w: LayoutItem) => w.i === editingWidget.value!.i)
+      const idx = layout.value.findIndex((w) => w.i === editingWidget.value!.i)
       if (idx !== -1) {
         layout.value[idx] = {
           ...layout.value[idx],
@@ -129,7 +132,7 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
     } else {
       // Add new
       const newId = Date.now().toString()
-      const defaultSizes: Record<string, { w: number; h: number }> = {
+      const defaultSizes: Record<WidgetType, { w: number; h: number }> = {
         chart: { w: 6, h: 6 },
         stacked: { w: 12, h: 8 },
         value: { w: 3, h: 4 },

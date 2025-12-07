@@ -8,17 +8,11 @@
 
         <v-divider></v-divider>
 
-        <v-list-item @click="navigate('/')" link>
-          <v-list-item-icon>
-            <v-icon>mdi-chart-line</v-icon>
-          </v-list-item-icon>
+        <v-list-item @click="navigate('/')" link prepend-icon="mdi-chart-line">
           <v-list-item-title>Grid Summary</v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="navigate('/large-display')" link>
-          <v-list-item-icon>
-            <v-icon>mdi-monitor</v-icon>
-          </v-list-item-icon>
+        <v-list-item @click="navigate('/large-display')" link prepend-icon="mdi-monitor">
           <v-list-item-title>Large Display</v-list-item-title>
         </v-list-item>
 
@@ -30,10 +24,8 @@
           :key="view.id"
           @click="navigate(`/view/${view.id}`)"
           link
+          prepend-icon="mdi-view-grid"
         >
-          <v-list-item-icon>
-            <v-icon>mdi-view-grid</v-icon>
-          </v-list-item-icon>
           <v-list-item-title>{{ view.name }}</v-list-item-title>
           <template #append>
             <v-btn
@@ -51,10 +43,8 @@
           :key="view.id"
           @click="navigate(`/view/${view.id}`)"
           link
+          prepend-icon="mdi-view-grid-outline"
         >
-          <v-list-item-icon>
-            <v-icon>mdi-view-grid-outline</v-icon>
-          </v-list-item-icon>
           <v-list-item-title>{{ view.name }}</v-list-item-title>
           <template #append>
             <v-btn
@@ -66,19 +56,13 @@
           </template>
         </v-list-item>
 
-        <v-list-item @click="showNewViewDialog = true" link>
-          <v-list-item-icon>
-            <v-icon>mdi-plus</v-icon>
-          </v-list-item-icon>
+        <v-list-item @click="showNewViewDialog = true" link prepend-icon="mdi-plus">
           <v-list-item-title>New View</v-list-item-title>
         </v-list-item>
 
         <v-divider class="my-2"></v-divider>
 
-        <v-list-item @click="navigate('/help')" link>
-          <v-list-item-icon>
-            <v-icon>mdi-help-circle</v-icon>
-          </v-list-item-icon>
+        <v-list-item @click="navigate('/help')" link prepend-icon="mdi-help-circle">
           <v-list-item-title>Help</v-list-item-title>
         </v-list-item>
       </v-list>

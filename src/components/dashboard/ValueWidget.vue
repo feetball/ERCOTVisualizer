@@ -10,33 +10,27 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { dataService } from '@/services/dataService'
 import { format } from 'date-fns'
+import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
+import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
 
 const props = defineProps<{
-  config: any
-  style?: any
+  config: BaseWidgetConfig
+  styleConfig?: WidgetStyle
 }>()
 
 const value = ref<number | null>(null)
 const timestamp = ref<string>('')
-let intervalId: any = null
+let intervalId: ReturnType<typeof setInterval> | null = null
 
 const formattedValue = computed(() => {
   if (value.value === null) return '---'
-  let val = value.value
-  if (props.config?.calculation) {
-    try {
-      const fn = new Function('value', props.config.calculation)
-      val = fn(val)
-    } catch (e) {
-      console.error('Calculation error:', e)
-    }
-  }
-  return typeof val === 'number' ? val.toFixed(2) : val
+  const val = safeCalculate(value.value, props.config?.calculation)
+  return typeof val === 'number' ? val.toFixed(props.config?.decimals ?? 2) : val
 })
 
 const valueStyle = computed(() => {
-  const s: any = {}
-  if (props.style?.valueColor) s.color = props.style.valueColor
+  const s: Record<string, string> = {}
+  if (props.styleConfig?.valueColor) s.color = props.styleConfig.valueColor
   return s
 })
 
@@ -54,7 +48,7 @@ async function fetchData() {
 
 onMounted(() => {
   fetchData()
-  intervalId = setInterval(fetchData, 5000)
+  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL)
 })
 
 onUnmounted(() => {

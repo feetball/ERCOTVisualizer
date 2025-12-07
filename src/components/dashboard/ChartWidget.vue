@@ -5,17 +5,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { dataService } from '@/services/dataService'
+import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
+import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
+
+interface DataPoint {
+  Timestamp: string
+  Value: number
+}
+
+interface ChartDataPoint {
+  x: number
+  y: number
+}
 
 const props = defineProps<{
-  config: any
-  style?: any
+  config: BaseWidgetConfig
+  styleConfig?: WidgetStyle
 }>()
 
-const series = ref<any[]>([])
+const series = ref<{ name: string; data: ChartDataPoint[] }[]>([])
+let intervalId: ReturnType<typeof setInterval> | null = null
 
-const lineColor = computed(() => props.style?.valueColor || '#1867C0')
+const lineColor = computed(() => props.styleConfig?.valueColor || '#1867C0')
 
 // Determine if this is a Hz chart (for decimal formatting)
 const isHz = computed(() => {
@@ -29,7 +42,7 @@ const chartOptions = computed(() => ({
     id: `chart-${props.config?.tag}`,
     toolbar: { show: false },
     animations: { enabled: false },
-    background: props.style?.backgroundColor || 'transparent'
+    background: props.styleConfig?.backgroundColor || 'transparent'
   },
   colors: [lineColor.value],
   xaxis: {
@@ -74,7 +87,7 @@ const chartOptions = computed(() => ({
 }))
 
 async function fetchData() {
-  if (!props.config.tag) return
+  if (!props.config?.tag) return
 
   try {
     // Use durationHours from config if provided, otherwise default to 8
@@ -83,24 +96,17 @@ async function fetchData() {
     const startTime = new Date(endTime.getTime() - durationHours * 60 * 60 * 1000)
 
     const intervals = 100
-    const data = await dataService.getStreamPlot(
+    const data: DataPoint[] = await dataService.getStreamPlot(
       props.config.tag,
       startTime.toISOString(),
       endTime.toISOString(),
       intervals
     )
 
-    let processedData = data.map((d: any) => ({ x: new Date(d.Timestamp).getTime(), y: d.Value }))
-    
-    // Apply calculation if provided
-    if (props.config?.calculation) {
-      try {
-        const fn = new Function('value', props.config.calculation)
-        processedData = processedData.map((p: any) => ({ ...p, y: fn(p.y) }))
-      } catch (e) {
-        console.error('Calculation error:', e)
-      }
-    }
+    const processedData: ChartDataPoint[] = data.map((d) => ({ 
+      x: new Date(d.Timestamp).getTime(), 
+      y: safeCalculate(d.Value, props.config.calculation)
+    }))
     
     series.value = [{
       name: props.config.tag,
@@ -111,10 +117,18 @@ async function fetchData() {
   }
 }
 
-onMounted(() => fetchData())
+onMounted(() => {
+  fetchData()
+  // Auto-refresh chart data
+  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL * 6) // Refresh every 30s for charts
+})
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId)
+})
 
 watch(
-  () => [props.config.tag, props.config.durationHours],
+  () => [props.config?.tag, props.config?.durationHours],
   () => {
     fetchData()
   }

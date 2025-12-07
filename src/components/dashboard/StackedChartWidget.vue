@@ -11,15 +11,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { dataService } from '@/services/dataService'
+import { WIDGET_REFRESH_INTERVAL } from '@/types/widget'
+import type { WidgetStyle, TagConfig } from '@/types/widget'
+
+interface StackedConfig {
+  tags?: TagConfig[]
+  durationHours?: number
+  unit?: string
+}
+
+interface DataPoint {
+  Timestamp: string
+  Value: number
+}
+
+interface ChartDataPoint {
+  x: number
+  y: number
+}
+
+interface SeriesData {
+  name: string
+  data: ChartDataPoint[]
+}
 
 const props = defineProps<{
-  config: any
-  style?: any
+  config: StackedConfig
+  styleConfig?: WidgetStyle
 }>()
 
-const series = ref<any[]>([])
+const series = ref<SeriesData[]>([])
+let intervalId: ReturnType<typeof setInterval> | null = null
 
 // Determine if this is a Hz chart (for decimal formatting)
 const isHz = computed(() => props.config?.unit === 'Hz')
@@ -31,9 +55,9 @@ const chartOptions = computed(() => ({
     stacked: true,
     toolbar: { show: false },
     animations: { enabled: false },
-    background: props.style?.backgroundColor || 'transparent'
+    background: props.styleConfig?.backgroundColor || 'transparent'
   },
-  colors: props.config?.tags?.map((t: any) => t.color) || ['#1867C0'],
+  colors: props.config?.tags?.map((t: TagConfig) => t.color) || ['#1867C0'],
   xaxis: {
     type: 'datetime',
     labels: {
@@ -101,17 +125,17 @@ async function fetchData() {
     const startTime = new Date(endTime.getTime() - durationHours * 60 * 60 * 1000)
     const intervals = 100
 
-    const seriesData: any[] = []
+    const seriesData: SeriesData[] = []
 
     for (const tagConfig of props.config.tags) {
-      const data = await dataService.getStreamPlot(
+      const data: DataPoint[] = await dataService.getStreamPlot(
         tagConfig.tag,
         startTime.toISOString(),
         endTime.toISOString(),
         intervals
       )
 
-      const processedData = data.map((d: any) => ({ 
+      const processedData: ChartDataPoint[] = data.map((d) => ({ 
         x: new Date(d.Timestamp).getTime(), 
         y: d.Value 
       }))
@@ -128,7 +152,14 @@ async function fetchData() {
   }
 }
 
-onMounted(() => fetchData())
+onMounted(() => {
+  fetchData()
+  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL * 6) // Refresh every 30s
+})
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId)
+})
 
 watch(
   () => [props.config?.tags, props.config?.durationHours],

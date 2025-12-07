@@ -22,10 +22,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { dataService } from '@/services/dataService'
+import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
+import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
+
+interface DataPoint {
+  Timestamp: string
+  Value: number
+}
 
 const props = defineProps<{
-  config: any
-  style?: any
+  config: BaseWidgetConfig
+  styleConfig?: WidgetStyle
 }>()
 
 const containerRef = ref<HTMLElement | null>(null)
@@ -34,7 +41,7 @@ const containerHeight = ref(150)
 const currentValue = ref<number | null>(null)
 const previousValue = ref<number | null>(null)
 const sparklineData = ref<number[]>([])
-let intervalId: any = null
+let intervalId: ReturnType<typeof setInterval> | null = null
 let resizeObserver: ResizeObserver | null = null
 
 // Determine if this is Hz (for decimal formatting)
@@ -46,20 +53,12 @@ const isHz = computed(() => {
 
 const formattedValue = computed(() => {
   if (currentValue.value === null) return '---'
-  let val = currentValue.value
-  if (props.config?.calculation) {
-    try {
-      const fn = new Function('value', props.config.calculation)
-      val = fn(val)
-    } catch (e) {
-      console.error('Calculation error:', e)
-    }
-  }
+  const val = safeCalculate(currentValue.value, props.config?.calculation)
   
   // Hz gets 2 decimals, MW/other gets 0 decimals
   let formatted: string
   if (isHz.value) {
-    formatted = val.toFixed(2)
+    formatted = val.toFixed(props.config?.decimals ?? 2)
   } else if (Math.abs(val) >= 1000000) {
     formatted = (val / 1000000).toFixed(0) + 'M'
   } else if (Math.abs(val) >= 10000) {
@@ -79,24 +78,31 @@ const formattedValue = computed(() => {
 // Auto-scaling font size based on container width
 const valueFontSize = computed(() => {
   // Scale based on container width, with reasonable bounds
-  const baseSize = Math.min(containerWidth.value / 5, containerHeight.value / 3)
+  // Guard against zero dimensions
+  const width = containerWidth.value || 200
+  const height = containerHeight.value || 150
+  const baseSize = Math.min(width / 5, height / 3)
   const clampedSize = Math.max(16, Math.min(baseSize, 120)) // Min 16px, max 120px
   return `${clampedSize}px`
 })
 
 const trendFontSize = computed(() => {
-  const baseSize = Math.min(containerWidth.value / 12, containerHeight.value / 8)
+  const width = containerWidth.value || 200
+  const height = containerHeight.value || 150
+  const baseSize = Math.min(width / 12, height / 8)
   const clampedSize = Math.max(10, Math.min(baseSize, 24))
   return `${clampedSize}px`
 })
 
 const trendIconSize = computed(() => {
-  const baseSize = Math.min(containerWidth.value / 14, containerHeight.value / 10)
+  const width = containerWidth.value || 200
+  const height = containerHeight.value || 150
+  const baseSize = Math.min(width / 14, height / 10)
   return Math.max(12, Math.min(baseSize, 20))
 })
 
 const valueStyle = computed(() => ({
-  color: props.style?.valueColor || '#4CAF50',
+  color: props.styleConfig?.valueColor || '#4CAF50',
   fontSize: valueFontSize.value
 }))
 
@@ -139,7 +145,7 @@ const sparklineOptions = computed(() => ({
       opacityTo: 0.1
     }
   },
-  colors: [props.style?.valueColor || '#4CAF50'],
+  colors: [props.styleConfig?.valueColor || '#4CAF50'],
   tooltip: { enabled: false }
 }))
 
@@ -159,13 +165,13 @@ async function fetchData() {
     // Get sparkline data (last hour, 20 points)
     const endTime = new Date()
     const startTime = new Date(endTime.getTime() - 60 * 60 * 1000)
-    const historical = await dataService.getStreamPlot(
+    const historical: DataPoint[] = await dataService.getStreamPlot(
       props.config.tag,
       startTime.toISOString(),
       endTime.toISOString(),
       20
     )
-    sparklineData.value = historical.map((d: any) => d.Value)
+    sparklineData.value = historical.map((d) => d.Value)
   } catch (error) {
     console.error('Error fetching stat data:', error)
   }
@@ -180,7 +186,7 @@ function updateSize() {
 
 onMounted(() => {
   fetchData()
-  intervalId = setInterval(fetchData, 10000)
+  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL * 2) // Refresh every 10s for stats
   
   // Set up resize observer for responsive sizing
   if (containerRef.value) {

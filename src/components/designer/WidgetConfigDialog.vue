@@ -18,20 +18,26 @@
         <v-tabs-window v-model="tab" class="mt-4">
           <!-- General Tab -->
           <v-tabs-window-item value="general">
-            <v-select
-              v-model="form.type"
-              :items="widgetTypes"
-              item-title="label"
-              item-value="value"
-              label="Widget Type"
-              density="compact"
-              :disabled="isEditing"
-            ></v-select>
-            <v-text-field
-              v-model="form.title"
-              label="Title"
-              density="compact"
-            ></v-text-field>
+            <v-form ref="formRef" v-model="formValid">
+              <v-select
+                v-model="form.type"
+                :items="widgetTypes"
+                item-title="label"
+                item-value="value"
+                label="Widget Type"
+                density="compact"
+                :disabled="isEditing"
+                :rules="[rules.required]"
+              ></v-select>
+              <v-text-field
+                v-model="form.title"
+                label="Title"
+                density="compact"
+                :rules="[rules.required, rules.minLength(2)]"
+                counter
+                maxlength="50"
+              ></v-text-field>
+            </v-form>
           </v-tabs-window-item>
 
           <!-- Data Source Tab -->
@@ -72,6 +78,9 @@
               label="Duration (hours)"
               type="number"
               density="compact"
+              :rules="[rules.positiveNumber]"
+              min="1"
+              max="168"
             ></v-text-field>
 
             <!-- Gauge/Stat specific options -->
@@ -97,6 +106,9 @@
                 label="Decimal Places"
                 type="number"
                 density="compact"
+                :rules="[rules.decimals]"
+                min="0"
+                max="6"
               ></v-text-field>
             </template>
 
@@ -125,15 +137,25 @@
 
           <!-- Calculations Tab -->
           <v-tabs-window-item value="calc">
-            <v-textarea
+            <v-alert type="info" variant="tonal" density="compact" class="mb-4">
+              <div class="text-body-2">
+                <strong>Safe Calculations:</strong> Use simple expressions like:
+                <ul class="mt-1 mb-0">
+                  <li><code>value * 2</code> - Multiply by 2</li>
+                  <li><code>value / 100</code> - Divide by 100</li>
+                  <li><code>value + 10</code> - Add 10</li>
+                  <li><code>value - 5</code> - Subtract 5</li>
+                </ul>
+              </div>
+            </v-alert>
+            <v-text-field
               v-model="form.config.calculation"
-              label="JavaScript Calculation (optional)"
-              placeholder="// 'value' contains the raw data point&#10;// Return the transformed value&#10;return value * 1.0"
-              rows="6"
+              label="Calculation Expression (optional)"
+              placeholder="value * 1.0"
               density="compact"
-              hint="Use 'value' for single values or 'data' array for charts. Return transformed result."
+              hint="Simple math: value * N, value / N, value + N, value - N"
               persistent-hint
-            ></v-textarea>
+            ></v-text-field>
           </v-tabs-window-item>
 
           <!-- Styling Tab -->
@@ -185,7 +207,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn variant="text" @click="close">Cancel</v-btn>
-        <v-btn color="primary" variant="flat" @click="save">{{ isEditing ? 'Update' : 'Add' }}</v-btn>
+        <v-btn color="primary" variant="flat" @click="save" :disabled="!formValid || !form.config.tag">{{ isEditing ? 'Update' : 'Add' }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -194,21 +216,70 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { ERCOT_TAGS } from '@/services/dataService'
+import type { WidgetType, WidgetStyle } from '@/types/widget'
+
+interface ErcotTag {
+  webId: string
+  name: string
+  path: string
+  description: string
+  unit: string
+  nominal: number
+  min: number
+  max: number
+}
+
+interface WidgetFormConfig {
+  tag: string
+  durationHours: number
+  calculation: string
+  label: string
+  min: number
+  max: number
+  unit: string
+  decimals: number
+}
+
+interface WidgetForm {
+  type: WidgetType
+  title: string
+  config: WidgetFormConfig
+  style: WidgetStyle
+}
 
 const props = defineProps<{
   modelValue: boolean
-  editWidget?: any
+  editWidget?: {
+    type?: WidgetType
+    title?: string
+    config?: Partial<WidgetFormConfig>
+    style?: Partial<WidgetStyle>
+  } | null
 }>()
 
-const emit = defineEmits(['update:modelValue', 'save'])
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  'save': [data: WidgetForm & { isEditing: boolean }]
+}>()
 
 const dialog = ref(false)
 const tab = ref('general')
 const isEditing = ref(false)
 const tagSearch = ref('')
+const formRef = ref()
+const formValid = ref(false)
+
+// Validation rules
+const rules = {
+  required: (v: string) => !!v || 'This field is required',
+  minLength: (min: number) => (v: string) => (v && v.length >= min) || `Must be at least ${min} characters`,
+  positiveNumber: (v: number) => (v === undefined || v === null || v > 0) || 'Must be a positive number',
+  decimals: (v: number) => (v === undefined || v === null || (v >= 0 && v <= 6)) || 'Must be between 0 and 6'
+}
 
 const widgetTypes = [
   { label: 'Line Chart', value: 'chart' },
+  { label: 'Stacked Area Chart', value: 'stacked' },
   { label: 'Single Value', value: 'value' },
   { label: 'Stat (Grafana-style)', value: 'stat' },
   { label: 'Gauge', value: 'gauge' },
@@ -218,7 +289,7 @@ const widgetTypes = [
 const fontSizes = ['0.75rem', '0.875rem', '1rem', '1.125rem', '1.25rem', '1.5rem', '2rem']
 
 // ERCOT tags for the tag browser
-const ercotTags = Object.values(ERCOT_TAGS).map((tag: any) => ({
+const ercotTags: ErcotTag[] = Object.values(ERCOT_TAGS).map((tag) => ({
   webId: tag.webId,
   name: tag.name,
   path: `\\\\ERCOT\\${tag.webId.replace('ERCOT.', '')}`,
@@ -229,9 +300,9 @@ const ercotTags = Object.values(ERCOT_TAGS).map((tag: any) => ({
   max: tag.max
 }))
 
-const filteredTags = ref(ercotTags)
+const filteredTags = ref<ErcotTag[]>(ercotTags)
 
-const defaultForm = () => ({
+const defaultForm = (): WidgetForm => ({
   type: 'chart',
   title: '',
   config: {
@@ -252,7 +323,7 @@ const defaultForm = () => ({
   }
 })
 
-const form = reactive(defaultForm())
+const form = reactive<WidgetForm>(defaultForm())
 
 watch(() => props.modelValue, (val) => {
   dialog.value = val
@@ -270,6 +341,8 @@ watch(() => props.modelValue, (val) => {
       isEditing.value = false
       Object.assign(form, defaultForm())
     }
+    // Validate form after populating
+    setTimeout(() => formRef.value?.validate(), 100)
   }
 })
 
@@ -286,7 +359,7 @@ function searchTags() {
   )
 }
 
-function selectTag(tag: any) {
+function selectTag(tag: ErcotTag) {
   form.config.tag = tag.webId
   if (!form.title) {
     form.title = tag.name

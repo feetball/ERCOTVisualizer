@@ -18,40 +18,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { dataService } from '@/services/dataService'
 import { format } from 'date-fns'
+import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
+import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
 
 const props = defineProps<{
-  config: any
-  style?: any
+  config: BaseWidgetConfig
+  styleConfig?: WidgetStyle
 }>()
+
+interface TableRow {
+  timestamp: string
+  value: number
+}
 
 const headers = [
   { title: 'Timestamp', key: 'timestamp', sortable: true },
   { title: 'Value', key: 'value', sortable: true }
 ]
 
-const tableData = ref<any[]>([])
+const tableData = ref<TableRow[]>([])
+let intervalId: ReturnType<typeof setInterval> | null = null
 
 function formatTimestamp(ts: string) {
   return format(new Date(ts), 'yyyy-MM-dd HH:mm:ss')
 }
 
-function formatValue(val: any) {
+function formatValue(val: unknown) {
   if (typeof val === 'number') {
-    let v = val
-    if (props.config?.calculation) {
-      try {
-        const fn = new Function('value', props.config.calculation)
-        v = fn(v)
-      } catch (e) {
-        console.error('Calculation error:', e)
-      }
-    }
-    return v.toFixed(4)
+    const v = safeCalculate(val, props.config?.calculation)
+    return v.toFixed(props.config?.decimals ?? 4)
   }
-  return val
+  return String(val)
 }
 
 async function fetchData() {
@@ -80,6 +80,11 @@ async function fetchData() {
 
 onMounted(() => {
   fetchData()
+  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL * 2) // Refresh every 10s for table
+})
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId)
 })
 
 watch(() => [props.config?.tag, props.config?.durationHours], () => {
