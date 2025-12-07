@@ -66,7 +66,7 @@
                 </v-list-item>
                 <v-list-item prepend-icon="mdi-poll">
                   <v-list-item-title><strong>Stat</strong></v-list-item-title>
-                  <v-list-item-subtitle>Grafana-style stat with sparkline and trend indicator</v-list-item-subtitle>
+                  <v-list-item-subtitle>Grafana-style stat with sparkline and trend indicator. Features white text values and light blue sparklines by default.</v-list-item-subtitle>
                 </v-list-item>
                 <v-list-item prepend-icon="mdi-gauge">
                   <v-list-item-title><strong>Gauge</strong></v-list-item-title>
@@ -118,7 +118,7 @@
                     Styling
                   </v-expansion-panel-title>
                   <v-expansion-panel-text>
-                    Customize colors, fonts, and appearance.
+                    Customize colors, fonts, and appearance. Stat widgets use white text and light blue sparklines by default, with green/red trend indicators for up/down changes.
                   </v-expansion-panel-text>
                 </v-expansion-panel>
               </v-expansion-panels>
