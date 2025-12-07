@@ -229,14 +229,14 @@ onUnmounted(() => {
 
 .stat-value {
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.2;
   text-align: center;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   max-width: 100%;
   text-shadow: 0 0 15px rgba(currentColor, 0.3);
   letter-spacing: -0.02em;
+  padding: 2px 0;
 }
 
 .trend-row {
@@ -268,11 +268,16 @@ onUnmounted(() => {
 /* Mobile optimizations */
 @media (max-width: 599px) {
   .stat-container {
-    padding: 12px;
+    padding: 12px 8px;
+  }
+  
+  .stat-content {
+    padding: 4px 0;
   }
   
   .stat-value {
     letter-spacing: -0.01em;
+    padding: 4px 0;
   }
   
   .trend-row {
