@@ -8,12 +8,31 @@
 
         <v-divider></v-divider>
 
+        <v-list-subheader>Pre-defined Views</v-list-subheader>
         <v-list-item @click="navigate('/')" link prepend-icon="mdi-chart-line">
           <v-list-item-title>Grid Summary</v-list-item-title>
+          <template #append>
+            <v-btn
+              icon="mdi-content-copy"
+              variant="text"
+              size="x-small"
+              title="Copy to My Views"
+              @click.stop="copyView('grid-summary', 'Grid Summary')"
+            ></v-btn>
+          </template>
         </v-list-item>
 
         <v-list-item @click="navigate('/large-display')" link prepend-icon="mdi-monitor">
           <v-list-item-title>Large Display</v-list-item-title>
+          <template #append>
+            <v-btn
+              icon="mdi-content-copy"
+              variant="text"
+              size="x-small"
+              title="Copy to My Views"
+              @click.stop="copyView('large-display', 'Large Display')"
+            ></v-btn>
+          </template>
         </v-list-item>
 
         <v-divider class="my-2"></v-divider>
@@ -86,6 +105,9 @@
       v{{ version }}
     </div>
 
+    <!-- Welcome Dialog -->
+    <WelcomeDialog />
+
     <!-- New View Dialog -->
     <v-dialog v-model="showNewViewDialog" max-width="500">
       <v-card>
@@ -133,6 +155,7 @@ import { ref, computed } from 'vue'
 import { useTheme } from 'vuetify'
 import { useRouter } from 'vue-router'
 import { useViewsStore } from '@/stores/views'
+import WelcomeDialog from '@/components/common/WelcomeDialog.vue'
 import packageInfo from '../package.json'
 
 const theme = useTheme()
@@ -156,6 +179,19 @@ function toggleTheme() {
 function navigate(path: string) {
   drawer.value = false
   router.push(path)
+}
+
+function copyView(sourceKey: string, sourceName: string) {
+  const newView = viewsStore.createView(`${sourceName} (Copy)`, false)
+  
+  // Copy the layout from the source view
+  const sourceLayout = localStorage.getItem(`${sourceKey}-layout`)
+  if (sourceLayout) {
+    localStorage.setItem(`custom-view-${newView.id}`, sourceLayout)
+  }
+  
+  drawer.value = false
+  router.push(`/view/${newView.id}`)
 }
 
 function createNewView() {

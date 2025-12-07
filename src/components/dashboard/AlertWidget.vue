@@ -1,11 +1,11 @@
 <template>
-  <div class="alert-widget fill-height d-flex align-center justify-center" :class="alertClass">
+  <div class="alert-widget fill-height d-flex flex-column align-center justify-center" :class="alertClass">
     <div class="alert-indicator" :style="{ backgroundColor: alertColor }">
-      <v-icon :icon="alertIcon" :color="iconColor" size="small"></v-icon>
+      <v-icon :icon="alertIcon" :color="iconColor" :size="iconSize"></v-icon>
     </div>
     <div class="alert-info" v-if="showLabel">
-      <div class="alert-label">{{ alertLabel }}</div>
-      <div class="alert-value" v-if="currentValue !== null">{{ formattedValue }}</div>
+      <div class="alert-value" :style="{ color: alertColor }" v-if="currentValue !== null">{{ formattedValue }}</div>
+      <div class="alert-label" :style="{ color: alertColor }">{{ alertLabel }}</div>
     </div>
   </div>
 </template>
@@ -138,6 +138,10 @@ const iconColor = computed(() => {
   return currentLevel.value === 'caution' ? '#000' : '#fff'
 })
 
+const iconSize = computed(() => {
+  return 24 // Icon size inside the indicator circle
+})
+
 const alertLabel = computed(() => {
   switch (currentLevel.value) {
     case 'normal': return 'Normal'
@@ -179,15 +183,17 @@ onUnmounted(() => {
 
 <style scoped>
 .alert-widget {
-  padding: 4px 8px;
+  padding: 8px;
   border-radius: 4px;
   transition: all 0.3s ease;
-  gap: 8px;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
 }
 
 .alert-indicator {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -229,11 +235,22 @@ onUnmounted(() => {
 .alert-info {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   min-width: 0;
+  width: 100%;
+}
+
+.alert-value {
+  font-size: 1.1rem;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 0 10px currentColor;
 }
 
 .alert-label {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;

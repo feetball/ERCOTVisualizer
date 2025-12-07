@@ -13,8 +13,9 @@
       <!-- Time selector - hidden on small screens -->
       <TimeSelector @update:time="handleTimeUpdate" class="mr-2 d-none d-sm-flex" />
       
-      <!-- Edit mode toggle -->
+      <!-- Edit mode toggle - only show if editing is allowed -->
       <v-btn 
+        v-if="canEdit"
         :variant="editMode ? 'flat' : 'text'" 
         :color="editMode ? 'primary' : undefined"
         size="small"
@@ -25,8 +26,20 @@
         <span class="d-none d-sm-inline">{{ editMode ? 'Done' : 'Edit' }}</span>
       </v-btn>
       
+      <!-- View-only indicator for pre-defined views -->
+      <v-chip 
+        v-else 
+        size="small" 
+        variant="outlined" 
+        color="secondary"
+        class="mr-1"
+      >
+        <v-icon start size="small">mdi-lock</v-icon>
+        <span class="d-none d-sm-inline">View Only</span>
+      </v-chip>
+      
       <!-- Edit mode controls -->
-      <template v-if="editMode">
+      <template v-if="editMode && canEdit">
         <v-menu>
           <template #activator="{ props }">
             <v-btn v-bind="props" variant="text" size="small" prepend-icon="mdi-plus">
@@ -180,6 +193,7 @@ const props = defineProps<{
   title: string
   storageKey: string
   defaultLayout: LayoutItem[]
+  allowEdit?: boolean
 }>()
 
 // Async component loading with error handling
@@ -210,6 +224,9 @@ const AlertWidget = defineAsyncComponent({
 
 // Responsive breakpoints
 const { xs, sm, md, lg, height } = useDisplay()
+
+// Computed: can edit this view
+const canEdit = computed(() => props.allowEdit !== false)
 
 // Use grid layout composable
 const {

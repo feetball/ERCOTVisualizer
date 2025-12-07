@@ -3,6 +3,7 @@
     title="Grid Summary"
     storage-key="grid-summary-layout"
     :default-layout="defaultLayout"
+    :allow-edit="false"
   />
 </template>
 
@@ -13,7 +14,7 @@ import { COLORS } from '@/styles/colors'
 
 // Default layout showcasing ERCOT grid data - optimized for 2K monitors
 const defaultLayout: LayoutItem[] = [
-  // Row 0: Alert indicators (small, top bar)
+  // Row 0: Alert indicators across the top (4 alerts)
   { 
     i: 'freq-alert', x: 0, y: 0, w: 1, h: 2, type: 'alert', 
     title: 'Freq', 
@@ -39,69 +40,71 @@ const defaultLayout: LayoutItem[] = [
     style: {} 
   },
   
-  // Row 1: 6 Key stats across the top (reduced height for more density)
+  // Row 0: Key stats (next to alerts)
   { 
-    i: 'freq-stat', x: 4, y: 0, w: 2, h: 3, type: 'stat', 
+    i: 'freq-stat', x: 4, y: 0, w: 2, h: 4, type: 'stat', 
     title: 'Grid Frequency', 
     config: { tag: 'ERCOT.GRID_FREQ', durationHours: 1, unit: 'Hz', decimals: 3 }, 
     style: { valueColor: COLORS.FREQUENCY } 
   },
   { 
-    i: 'demand-stat', x: 6, y: 0, w: 2, h: 3, type: 'stat', 
+    i: 'demand-stat', x: 6, y: 0, w: 2, h: 4, type: 'stat', 
     title: 'System Demand', 
     config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 1, unit: 'MW' }, 
     style: { valueColor: COLORS.DEMAND } 
   },
   { 
-    i: 'capacity-stat', x: 8, y: 0, w: 2, h: 3, type: 'stat', 
+    i: 'capacity-stat', x: 8, y: 0, w: 2, h: 4, type: 'stat', 
     title: 'Available Capacity', 
     config: { tag: 'ERCOT.AVAIL_CAPACITY', durationHours: 1, unit: 'MW' }, 
     style: { valueColor: COLORS.CAPACITY } 
   },
   { 
-    i: 'reserves-stat', x: 10, y: 0, w: 2, h: 3, type: 'stat', 
+    i: 'reserves-stat', x: 10, y: 0, w: 2, h: 4, type: 'stat', 
     title: 'Operating Reserves', 
     config: { tag: 'ERCOT.OP_RESERVES', durationHours: 1, unit: 'MW' }, 
     style: { valueColor: COLORS.RESERVES } 
   },
   
-  // Row 2: More stats and alerts
+  // Row 1: More stats below alerts
   { 
-    i: 'price-stat', x: 0, y: 2, w: 2, h: 3, type: 'stat', 
+    i: 'price-stat', x: 0, y: 2, w: 2, h: 4, type: 'stat', 
     title: 'RT Hub Price', 
     config: { tag: 'ERCOT.RT_PRICE', durationHours: 1, unit: '$', decimals: 2 }, 
     style: { valueColor: COLORS.PRICE } 
   },
   { 
-    i: 'outages-stat', x: 2, y: 2, w: 2, h: 3, type: 'stat', 
+    i: 'outages-stat', x: 2, y: 2, w: 2, h: 4, type: 'stat', 
     title: 'Total Outages', 
     config: { tag: 'ERCOT.OUTAGES', durationHours: 1, unit: 'MW' }, 
     style: { valueColor: COLORS.ALERT } 
   },
   
-  // Row 2: System load chart (left) and Gauges (right)
+  // Row 2: System Demand chart (wide) 
   { 
-    i: 'load-chart', x: 4, y: 3, w: 8, h: 5, type: 'chart', 
+    i: 'load-chart', x: 4, y: 4, w: 8, h: 6, type: 'chart', 
     title: 'System Demand (24h)', 
     config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 24 }, 
     style: { valueColor: COLORS.DEMAND } 
   },
+  
+  // Row 2: Gauges (left side)
   { 
-    i: 'reserves-gauge', x: 0, y: 5, w: 2, h: 5, type: 'gauge', 
+    i: 'reserves-gauge', x: 0, y: 6, w: 2, h: 4, type: 'gauge', 
     title: 'Reserve Margin', 
     config: { tag: 'ERCOT.OP_RESERVES', min: 0, max: 25000, unit: ' MW' }, 
     style: { valueColor: COLORS.RESERVES } 
   },
   { 
-    i: 'freq-gauge', x: 2, y: 5, w: 2, h: 5, type: 'gauge', 
+    i: 'freq-gauge', x: 2, y: 6, w: 2, h: 4, type: 'gauge', 
     title: 'Frequency', 
     config: { tag: 'ERCOT.GRID_FREQ', min: 59.9, max: 60.1, unit: ' Hz', decimals: 3 }, 
     style: { valueColor: COLORS.FREQUENCY } 
   },
   
-  // Row 3: Generation Mix (left) and Ancillary Services (right)
+  // Row 3: Generation Mix (wide, left) and Ancillary Services (right)
   { 
-    i: 'generation-stacked', x: 0, y: 10, w: 8, h: 6, type: 'stacked', 
+    i: 'generation-stacked', x: 0, y: 10, w: 8, h: 7, type: 'stacked', 
     title: 'Generation by Fuel Type (24h)', 
     config: { 
       durationHours: 24,
@@ -120,7 +123,7 @@ const defaultLayout: LayoutItem[] = [
     style: {} 
   },
   { 
-    i: 'ancillary-services', x: 8, y: 8, w: 4, h: 8, type: 'ancillary', 
+    i: 'ancillary-services', x: 8, y: 10, w: 4, h: 7, type: 'ancillary', 
     title: 'Ancillary Services (2h)', 
     config: { durationHours: 2 }, 
     style: {} 
@@ -128,13 +131,13 @@ const defaultLayout: LayoutItem[] = [
   
   // Row 4: Frequency and Price charts side by side
   { 
-    i: 'freq-chart', x: 0, y: 16, w: 6, h: 5, type: 'chart', 
+    i: 'freq-chart', x: 0, y: 17, w: 6, h: 5, type: 'chart', 
     title: 'Grid Frequency (4h)', 
     config: { tag: 'ERCOT.GRID_FREQ', durationHours: 4, unit: 'Hz' }, 
     style: { valueColor: COLORS.FREQUENCY } 
   },
   { 
-    i: 'price-chart', x: 6, y: 16, w: 6, h: 5, type: 'chart', 
+    i: 'price-chart', x: 6, y: 17, w: 6, h: 5, type: 'chart', 
     title: 'Real-Time Price (24h)', 
     config: { tag: 'ERCOT.RT_PRICE', durationHours: 24, unit: '$', decimals: 2 }, 
     style: { valueColor: COLORS.PRICE } 
