@@ -233,7 +233,6 @@ onUnmounted(() => {
   text-align: center;
   white-space: nowrap;
   overflow: visible;
-  text-overflow: ellipsis;
   max-width: 100%;
   text-shadow: 0 0 15px rgba(currentColor, 0.3);
   letter-spacing: -0.02em;
