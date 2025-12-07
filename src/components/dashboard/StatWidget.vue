@@ -102,7 +102,7 @@ const trendIconSize = computed(() => {
 })
 
 const valueStyle = computed(() => ({
-  color: props.styleConfig?.valueColor || '#4CAF50',
+  color: props.styleConfig?.valueColor || '#FFFFFF',
   fontSize: valueFontSize.value
 }))
 
@@ -145,7 +145,7 @@ const sparklineOptions = computed(() => ({
       opacityTo: 0.1
     }
   },
-  colors: [props.styleConfig?.valueColor || '#4CAF50'],
+  colors: [props.styleConfig?.valueColor || '#90CAF9'],
   tooltip: { enabled: false }
 }))
 
@@ -229,7 +229,7 @@ onUnmounted(() => {
 
 .stat-value {
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.1;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
