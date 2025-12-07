@@ -147,6 +147,7 @@
           @click="refreshAllWidgets"
           :loading="isRefreshing"
         ></v-btn>
+        <span class="text-caption text-medium-emphasis ml-3 version-text">v{{ version }}</span>
       </div>
     </v-footer>
 
@@ -165,10 +166,12 @@ import { GridLayout, GridItem } from 'grid-layout-plus'
 import { useGridLayout, type LayoutItem } from '@/composables/useGridLayout'
 import TimeSelector from '@/components/common/TimeSelector.vue'
 import WidgetConfigDialog from '@/components/designer/WidgetConfigDialog.vue'
+import packageInfo from '../../package.json'
 
 // Constants
 const TOOLBAR_HEIGHT = 45
 const STATUS_BAR_HEIGHT = 24
+const version = (packageInfo as { version: string }).version
 
 const props = defineProps<{
   title: string
@@ -490,5 +493,10 @@ onUnmounted(() => {
     opacity: 0.7;
     filter: drop-shadow(0 0 6px currentColor);
   }
+}
+
+.version-text {
+  font-family: monospace;
+  opacity: 0.6;
 }
 </style>

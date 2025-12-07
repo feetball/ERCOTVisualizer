@@ -1,6 +1,13 @@
 <template>
-  <div class="fill-height chart-wrapper">
-    <apexchart width="100%" height="100%" type="line" :options="chartOptions" :series="series"></apexchart>
+  <div class="fill-height chart-wrapper" ref="chartContainer">
+    <apexchart 
+      v-if="chartHeight > 0"
+      width="100%" 
+      :height="chartHeight" 
+      type="area" 
+      :options="chartOptions" 
+      :series="series"
+    ></apexchart>
   </div>
 </template>
 
@@ -25,8 +32,11 @@ const props = defineProps<{
   styleConfig?: WidgetStyle
 }>()
 
+const chartContainer = ref<HTMLElement | null>(null)
+const chartHeight = ref(0)
 const series = ref<{ name: string; data: ChartDataPoint[] }[]>([])
 let intervalId: ReturnType<typeof setInterval> | null = null
+let resizeObserver: ResizeObserver | null = null
 
 const lineColor = computed(() => props.styleConfig?.valueColor || '#1867C0')
 
@@ -180,6 +190,17 @@ async function fetchData() {
 }
 
 onMounted(() => {
+  // Set up resize observer for dynamic height
+  if (chartContainer.value) {
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        chartHeight.value = entry.contentRect.height
+      }
+    })
+    resizeObserver.observe(chartContainer.value)
+    chartHeight.value = chartContainer.value.offsetHeight
+  }
+  
   fetchData()
   // Auto-refresh chart data
   intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL * 6) // Refresh every 30s for charts
@@ -187,6 +208,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId)
+  if (resizeObserver) resizeObserver.disconnect()
 })
 
 watch(
