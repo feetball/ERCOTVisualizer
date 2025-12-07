@@ -99,7 +99,7 @@
                 </v-card-title>
                 <v-card-text class="flex-grow-1 pa-1 widget-content">
                   <Suspense>
-                    <component :is="getWidgetComponent(item.type)" :config="item.config" :style="item.style" />
+                    <component :is="getWidgetComponent(item.type)" :config="item.config" :style-config="item.style" />
                     <template #fallback>
                       <div class="d-flex align-center justify-center fill-height">
                         <v-progress-circular indeterminate size="24"></v-progress-circular>
