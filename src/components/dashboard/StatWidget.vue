@@ -216,20 +216,6 @@ onUnmounted(() => {
   position: relative;
 }
 
-/* Subtle animated gradient background */
-.stat-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(ellipse at 50% 0%, 
-    rgba(var(--v-theme-primary), 0.05) 0%, 
-    transparent 70%);
-  pointer-events: none;
-}
-
 .stat-content {
   display: flex;
   flex-direction: column;
@@ -249,20 +235,8 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-  text-shadow: 0 0 30px currentColor;
+  text-shadow: 0 0 15px rgba(currentColor, 0.3);
   letter-spacing: -0.02em;
-  animation: value-glow 3s ease-in-out infinite;
-}
-
-@keyframes value-glow {
-  0%, 100% {
-    text-shadow: 0 0 20px currentColor, 0 0 40px rgba(var(--v-theme-primary), 0.3);
-    opacity: 1;
-  }
-  50% {
-    text-shadow: 0 0 30px currentColor, 0 0 60px rgba(var(--v-theme-primary), 0.5);
-    opacity: 0.95;
-  }
 }
 
 .trend-row {

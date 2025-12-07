@@ -67,7 +67,7 @@ export interface WidgetStyle {
 }
 
 /** Widget types supported by the application */
-export type WidgetType = 'chart' | 'value' | 'stat' | 'gauge' | 'table' | 'stacked'
+export type WidgetType = 'chart' | 'value' | 'stat' | 'gauge' | 'table' | 'stacked' | 'ancillary'
 
 /** Layout item for grid-layout-plus */
 export interface LayoutItem {

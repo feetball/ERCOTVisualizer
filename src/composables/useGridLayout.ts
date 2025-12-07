@@ -138,7 +138,8 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
         value: { w: 3, h: 4 },
         stat: { w: 3, h: 5 },
         gauge: { w: 3, h: 5 },
-        table: { w: 6, h: 6 }
+        table: { w: 6, h: 6 },
+        ancillary: { w: 6, h: 6 }
       }
       const size = defaultSizes[data.type] || { w: 6, h: 5 }
       layout.value.push({

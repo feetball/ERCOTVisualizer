@@ -1,70 +1,121 @@
 <template>
-  <div class="fill-height bg-black d-flex flex-column">
-    <v-toolbar density="compact" color="grey-darken-4">
-      <v-toolbar-title>Large Display Controller</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn prepend-icon="mdi-plus" @click="addDashboard">Add Dashboard</v-btn>
-    </v-toolbar>
-
-    <div class="flex-grow-1 overflow-hidden">
-      <GridLayout
-        v-model:layout="layout"
-        :col-num="12"
-        :row-height="30"
-        :is-draggable="true"
-        :is-resizable="true"
-        :vertical-compact="true"
-        :use-css-transforms="true"
-      >
-        <GridItem
-          v-for="item in layout"
-          :key="item.i"
-          :x="item.x"
-          :y="item.y"
-          :w="item.w"
-          :h="item.h"
-          :i="item.i"
-          class="bg-surface border"
-        >
-          <div class="fill-height d-flex flex-column">
-            <div class="bg-grey-darken-3 px-2 py-1 d-flex justify-space-between align-center">
-              <span class="text-caption">Dashboard {{ item.i }}</span>
-              <v-btn icon="mdi-close" size="x-small" variant="text" color="error" @click="removeDashboard(item.i)"></v-btn>
-            </div>
-            <div class="flex-grow-1 position-relative">
-              <!-- In a real app, this would render the Dashboard component with a specific ID -->
-              <div class="d-flex align-center justify-center fill-height text-grey">
-                Dashboard Content Placeholder
-              </div>
-            </div>
-          </div>
-        </GridItem>
-      </GridLayout>
-    </div>
-  </div>
+  <BaseGridView
+    title="Large Display"
+    storage-key="large-display-layout"
+    :default-layout="defaultLayout"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { GridLayout, GridItem } from 'grid-layout-plus'
+import BaseGridView from './BaseGridView.vue'
+import type { LayoutItem } from '@/composables/useGridLayout'
 
-const layout = ref([
-  { i: '1', x: 0, y: 0, w: 6, h: 10 },
-  { i: '2', x: 6, y: 0, w: 6, h: 10 }
-])
+// Color palette for large display - high contrast for visibility
+const COLOR_FREQ = '#00E5FF'      // Cyan for frequency
+const COLOR_DEMAND = '#42A5F5'    // Blue for demand
+const COLOR_CAPACITY = '#26A69A'  // Teal for capacity
+const COLOR_RESERVES = '#7E57C2'  // Purple for reserves
+const COLOR_PRICE = '#FFB300'     // Amber for prices
+const COLOR_ALERT = '#FF5252'     // Red for alerts
 
-function addDashboard() {
-  layout.value.push({
-    i: Date.now().toString(),
-    x: 0,
-    y: 0,
-    w: 4,
-    h: 8
-  })
-}
+// ERCOT Fuel Mix colors (exact match from ercot.com/gridmktinfo/dashboards/fuelmix)
+const COLOR_SOLAR = '#F7931E'     // Orange for Solar
+const COLOR_WIND = '#235B97'      // Dark Blue for Wind  
+const COLOR_HYDRO = '#00A99D'     // Teal for Hydro
+const COLOR_STORAGE = '#BE1E2D'   // Dark Red for Power Storage
+const COLOR_OTHER = '#808080'     // Grey for Other
+const COLOR_GAS = '#4DB848'       // Green for Natural Gas
+const COLOR_COAL = '#754C24'      // Brown for Coal and Lignite
+const COLOR_NUCLEAR = '#FDB913'   // Yellow/Gold for Nuclear
 
-function removeDashboard(id: string) {
-  const index = layout.value.findIndex(item => item.i === id)
-  if (index !== -1) layout.value.splice(index, 1)
-}
+// Large display layout - optimized for TV/wall displays
+// Bigger widgets, fewer items, high visibility
+const defaultLayout: LayoutItem[] = [
+  // Top row: 4 key metrics - large and prominent
+  { 
+    i: 'demand-big', x: 0, y: 0, w: 3, h: 5, type: 'stat', 
+    title: 'System Demand', 
+    config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 1, unit: 'MW' }, 
+    style: { valueColor: COLOR_DEMAND } 
+  },
+  { 
+    i: 'capacity-big', x: 3, y: 0, w: 3, h: 5, type: 'stat', 
+    title: 'Available Capacity', 
+    config: { tag: 'ERCOT.AVAIL_CAPACITY', durationHours: 1, unit: 'MW' }, 
+    style: { valueColor: COLOR_CAPACITY } 
+  },
+  { 
+    i: 'reserves-big', x: 6, y: 0, w: 3, h: 5, type: 'stat', 
+    title: 'Operating Reserves', 
+    config: { tag: 'ERCOT.OP_RESERVES', durationHours: 1, unit: 'MW' }, 
+    style: { valueColor: COLOR_RESERVES } 
+  },
+  { 
+    i: 'freq-big', x: 9, y: 0, w: 3, h: 5, type: 'stat', 
+    title: 'Grid Frequency', 
+    config: { tag: 'ERCOT.GRID_FREQ', durationHours: 1, unit: 'Hz', decimals: 2 }, 
+    style: { valueColor: COLOR_FREQ } 
+  },
+
+  // Second row: Price, Outages, and Gauges
+  { 
+    i: 'price-big', x: 0, y: 5, w: 3, h: 5, type: 'stat', 
+    title: 'Real-Time Price', 
+    config: { tag: 'ERCOT.RT_PRICE', durationHours: 1, unit: '$/MWh', decimals: 2 }, 
+    style: { valueColor: COLOR_PRICE } 
+  },
+  { 
+    i: 'outages-big', x: 3, y: 5, w: 3, h: 5, type: 'stat', 
+    title: 'Total Outages', 
+    config: { tag: 'ERCOT.OUTAGES', durationHours: 1, unit: 'MW' }, 
+    style: { valueColor: COLOR_ALERT } 
+  },
+  { 
+    i: 'reserves-gauge', x: 6, y: 5, w: 3, h: 5, type: 'gauge', 
+    title: 'Reserve Margin', 
+    config: { tag: 'ERCOT.OP_RESERVES', min: 0, max: 30000, unit: ' MW' }, 
+    style: { valueColor: COLOR_RESERVES } 
+  },
+  { 
+    i: 'freq-gauge', x: 9, y: 5, w: 3, h: 5, type: 'gauge', 
+    title: 'Grid Frequency', 
+    config: { tag: 'ERCOT.GRID_FREQ', min: 59.9, max: 60.1, unit: ' Hz', decimals: 3 }, 
+    style: { valueColor: COLOR_FREQ } 
+  },
+
+  // Third row: Full-width demand chart
+  { 
+    i: 'demand-chart', x: 0, y: 10, w: 12, h: 7, type: 'chart', 
+    title: 'System Demand - Last 24 Hours', 
+    config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 24, unit: 'MW' }, 
+    style: { valueColor: COLOR_DEMAND } 
+  },
+
+  // Fourth row: Ancillary Services and Generation mix
+  { 
+    i: 'ancillary-services', x: 0, y: 17, w: 4, h: 9, type: 'ancillary', 
+    title: 'Ancillary Services', 
+    config: { durationHours: 2 }, 
+    style: {} 
+  },
+  { 
+    i: 'gen-stacked', x: 4, y: 17, w: 8, h: 9, type: 'stacked', 
+    title: 'Generation by Fuel Type - Last 24 Hours', 
+    config: { 
+      durationHours: 24,
+      unit: 'MW',
+      tags: [
+        { tag: 'ERCOT.SOLAR_GEN', name: 'Solar', color: COLOR_SOLAR },
+        { tag: 'ERCOT.WIND_GEN', name: 'Wind', color: COLOR_WIND },
+        { tag: 'ERCOT.HYDRO_GEN', name: 'Hydro', color: COLOR_HYDRO },
+        { tag: 'ERCOT.STORAGE_NET', name: 'Storage', color: COLOR_STORAGE },
+        { tag: 'ERCOT.OTHER_GEN', name: 'Other', color: COLOR_OTHER },
+        { tag: 'ERCOT.GAS_GEN', name: 'Natural Gas', color: COLOR_GAS },
+        { tag: 'ERCOT.COAL_GEN', name: 'Coal', color: COLOR_COAL },
+        { tag: 'ERCOT.NUCLEAR_GEN', name: 'Nuclear', color: COLOR_NUCLEAR }
+      ]
+    }, 
+    style: {} 
+  }
+]
 </script>

@@ -68,7 +68,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app color="primary" density="compact" :height="45">
+    <v-app-bar app density="compact" :height="45" class="app-bar-dark">
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-app-bar-title class="text-body-1">ERCOT Grid Monitor</v-app-bar-title>
       <v-spacer></v-spacer>
@@ -201,16 +201,11 @@ function deleteView() {
   font-family: monospace;
 }
 
-/* Enhanced app bar gradient */
-:deep(.v-app-bar) {
-  background: linear-gradient(90deg, 
-    rgba(var(--v-theme-primary), 0.95) 0%, 
-    rgba(var(--v-theme-primary-darken-1), 1) 50%,
-    rgba(var(--v-theme-primary), 0.95) 100%) !important;
-  border-bottom: 1px solid rgba(var(--v-theme-secondary), 0.3);
-  box-shadow: 
-    0 2px 20px rgba(0, 0, 0, 0.3),
-    0 0 40px rgba(var(--v-theme-primary), 0.2) !important;
+/* Dark app bar - differentiated from view content */
+.app-bar-dark {
+  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%) !important;
+  border-bottom: 1px solid rgba(88, 166, 255, 0.3);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 :deep(.v-app-bar-title) {

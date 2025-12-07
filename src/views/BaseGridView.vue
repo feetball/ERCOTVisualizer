@@ -46,6 +46,9 @@
             <v-list-item @click="addWidget('stacked')" prepend-icon="mdi-chart-areaspline">
               <v-list-item-title>Stacked Chart</v-list-item-title>
             </v-list-item>
+            <v-list-item @click="addWidget('ancillary')" prepend-icon="mdi-table-row">
+              <v-list-item-title>Ancillary Services</v-list-item-title>
+            </v-list-item>
           </v-list>
         </v-menu>
         
@@ -190,6 +193,10 @@ const StackedChartWidget = defineAsyncComponent({
   loader: () => import('@/components/dashboard/StackedChartWidget.vue'),
   onError: (error) => console.error('Failed to load StackedChartWidget:', error)
 })
+const AncillaryServicesWidget = defineAsyncComponent({
+  loader: () => import('@/components/dashboard/AncillaryServicesWidget.vue'),
+  onError: (error) => console.error('Failed to load AncillaryServicesWidget:', error)
+})
 
 // Responsive breakpoints
 const { xs, sm, md, lg, height } = useDisplay()
@@ -277,6 +284,7 @@ function getWidgetComponent(type: string) {
     case 'stacked': return StackedChartWidget
     case 'stat': return StatWidget
     case 'gauge': return GaugeWidget
+    case 'ancillary': return AncillaryServicesWidget
     default: return ChartWidget
   }
 }
