@@ -380,6 +380,7 @@ onUnmounted(() => {
     0 0 40px rgba(var(--v-theme-primary), 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   overflow: hidden;
+  position: relative;
 }
 
 .widget-card::before {
@@ -438,6 +439,8 @@ onUnmounted(() => {
   text-transform: uppercase;
   background: transparent;
   border-bottom: none;
+  position: relative;
+  z-index: 0; /* keep title behind content */
 }
 
 /* Mobile-specific title styling */
@@ -473,6 +476,7 @@ onUnmounted(() => {
   min-height: 0;
   overflow: hidden;
   position: relative;
+  z-index: 2; /* bring content above title */
 }
 
 /* Status bar with glow effect */
