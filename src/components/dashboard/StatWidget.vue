@@ -1,7 +1,9 @@
 <template>
   <div class="stat-container fill-height" ref="containerRef">
     <div class="stat-content">
-      <div class="stat-value" :style="valueStyle">{{ formattedValue }}</div>
+        <div class="stat-value-wrapper">
+          <div ref="valueRef" class="stat-value" :style="[valueStyle, valueTransformStyle]">{{ formattedValue }}</div>
+        </div>
       <div class="trend-row" :style="{ color: trendColor }">
         <v-icon :size="trendIconSize" :color="trendColor">{{ trendIcon }}</v-icon>
         <span class="trend-text" :style="{ fontSize: trendFontSize }">{{ trendText }}</span>
@@ -20,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { dataService } from '@/services/dataService'
 import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
 import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
@@ -36,6 +38,8 @@ const props = defineProps<{
 }>()
 
 const containerRef = ref<HTMLElement | null>(null)
+const valueRef = ref<HTMLElement | null>(null)
+const scale = ref(1)
 const containerWidth = ref(200)
 const containerHeight = ref(150)
 const currentValue = ref<number | null>(null)
@@ -112,7 +116,16 @@ const trendIconSize = computed(() => {
 
 const valueStyle = computed(() => ({
   color: props.styleConfig?.valueColor || '#FFFFFF',
-  fontSize: valueFontSize.value
+  fontSize: valueFontSize.value,
+  whiteSpace: 'nowrap',
+  display: 'inline-block',
+  transformOrigin: 'center center'
+}))
+
+const valueTransformStyle = computed(() => ({
+  transform: `scale(${scale.value})`,
+  display: 'inline-block',
+  willChange: 'transform'
 }))
 
 const trendDirection = computed(() => {
@@ -191,6 +204,30 @@ function updateSize() {
     containerWidth.value = containerRef.value.offsetWidth
     containerHeight.value = containerRef.value.offsetHeight
   }
+  // Recompute text scale after size changes
+  computeScale()
+}
+
+function computeScale() {
+  nextTick(() => {
+    if (!valueRef.value || !containerRef.value) {
+      scale.value = 1
+      return
+    }
+
+    const padding = 16
+    const availableW = Math.max(20, containerWidth.value - padding)
+    const availableH = Math.max(20, containerHeight.value - padding - 28) // reserve space for trend
+
+    const measuredW = valueRef.value.scrollWidth || valueRef.value.offsetWidth || 1
+    const measuredH = valueRef.value.scrollHeight || valueRef.value.offsetHeight || 1
+
+    const sW = availableW / measuredW
+    const sH = availableH / measuredH
+    const newScale = Math.min(1, sW, sH)
+    // Clamp to reasonable lower bound so it remains readable
+    scale.value = Math.max(0.5, Math.min(1, newScale))
+  })
 }
 
 onMounted(() => {
@@ -205,6 +242,11 @@ onMounted(() => {
     resizeObserver.observe(containerRef.value)
     updateSize()
   }
+  
+  // Recompute when value changes
+  watch(formattedValue, () => {
+    computeScale()
+  })
 })
 
 onUnmounted(() => {
@@ -246,6 +288,14 @@ onUnmounted(() => {
   text-shadow: 0 0 15px rgba(currentColor, 0.3);
   letter-spacing: -0.02em;
   padding: 2px 0;
+}
+
+.stat-value-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .trend-row {
