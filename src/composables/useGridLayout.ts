@@ -11,7 +11,7 @@ export type { LayoutItem, WidgetConfig, WidgetStyle }
  * @param storageKey - localStorage key for persisting layout
  * @param defaultLayout - Default layout to use if none saved
  */
-export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
+export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[], options?: { persist?: boolean }) {
   const layout = ref<LayoutItem[]>([])
   const editMode = ref(false)
   const showConfigDialog = ref(false)
@@ -27,8 +27,11 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
     return lastRefresh.value.toLocaleTimeString()
   })
 
+  const persist = options?.persist !== false
+
   // Debounced save to prevent excessive localStorage writes
   const debouncedSave = useDebounceFn(() => {
+    if (!persist) return
     try {
       localStorage.setItem(storageKey, JSON.stringify(layout.value))
     } catch (error) {
@@ -50,6 +53,7 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
   }
 
   function saveLayout() {
+    if (!persist) return
     try {
       localStorage.setItem(storageKey, JSON.stringify(layout.value))
     } catch (error) {
@@ -58,6 +62,11 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
   }
 
   function loadLayout() {
+    if (!persist) {
+      layout.value = [...defaultLayout.map(item => ({ ...item }))]
+      return
+    }
+
     const saved = localStorage.getItem(storageKey)
     if (saved) {
       try {
@@ -77,7 +86,9 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[]) {
   }
 
   function resetLayout() {
-    localStorage.removeItem(storageKey)
+    if (persist) {
+      localStorage.removeItem(storageKey)
+    }
     layout.value = [...defaultLayout.map(item => ({ ...item }))]
     saveLayout()
   }

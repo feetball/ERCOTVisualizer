@@ -251,7 +251,7 @@ const {
   stopAutoRefresh,
   getCardStyle,
   getTitleStyle
-} = useGridLayout(props.storageKey, props.defaultLayout)
+} = useGridLayout(props.storageKey, props.defaultLayout, { persist: canEdit.value })
 
 // Responsive computed properties - optimized for mobile to show all widgets at full width
 const responsiveColNum = computed(() => {
