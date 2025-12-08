@@ -139,7 +139,7 @@ const iconColor = computed(() => {
 })
 
 const iconSize = computed(() => {
-  return 40 // Larger icon size for visibility
+  return 30 // Reduced ~25% for balance
 })
 
 const alertLabel = computed(() => {
@@ -195,14 +195,14 @@ onUnmounted(() => {
 }
 
 .alert-indicator {
-  width: 56px;
-  height: 56px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 0 18px currentColor;
+  box-shadow: 0 0 14px currentColor;
   animation: pulse-glow 1.8s ease-in-out infinite;
 }
 
