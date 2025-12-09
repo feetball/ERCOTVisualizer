@@ -217,7 +217,10 @@ function computeScale() {
 
     const padding = 16
     const availableW = Math.max(20, containerWidth.value - padding)
-    const availableH = Math.max(20, containerHeight.value - padding - 28) // reserve space for trend
+    // Reserve headroom for trend row and sparkline; keep more height on mobile to prevent clipping
+    const sparklineReserve = containerHeight.value < 260 ? containerHeight.value * 0.35 : containerHeight.value * 0.3
+    const trendReserve = 32
+    const availableH = Math.max(24, containerHeight.value - padding - sparklineReserve - trendReserve)
 
     const measuredW = valueRef.value.scrollWidth || valueRef.value.offsetWidth || 1
     const measuredH = valueRef.value.scrollHeight || valueRef.value.offsetHeight || 1
@@ -263,7 +266,7 @@ onUnmounted(() => {
   height: 100%;
   padding: 8px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible; /* allow scaled text to flow without clipping */
   position: relative;
 }
 
@@ -276,6 +279,7 @@ onUnmounted(() => {
   min-height: 0;
   position: relative;
   z-index: 1;
+  overflow: visible;
 }
 
 .stat-value {
@@ -295,7 +299,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .trend-row {
