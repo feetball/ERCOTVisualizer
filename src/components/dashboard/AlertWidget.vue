@@ -139,7 +139,7 @@ const iconColor = computed(() => {
 })
 
 const iconSize = computed(() => {
-  return 30 // Reduced ~25% for balance
+  return 26 // Slightly smaller to prevent clipping in compact cards
 })
 
 const alertLabel = computed(() => {
@@ -186,7 +186,7 @@ onUnmounted(() => {
   padding: 6px;
   border-radius: 4px;
   transition: all 0.25s ease;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -195,8 +195,8 @@ onUnmounted(() => {
 }
 
 .alert-indicator {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;

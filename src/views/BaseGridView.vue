@@ -381,7 +381,7 @@ onUnmounted(() => {
     0 4px 20px rgba(0, 0, 0, 0.25),
     0 0 40px rgba(var(--v-theme-primary), 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-  overflow: hidden;
+  overflow: visible; /* let widget contents rise above the title when needed */
   position: relative;
 }
 
@@ -476,9 +476,10 @@ onUnmounted(() => {
 
 .widget-content {
   min-height: 0;
-  overflow: hidden;
+  overflow: visible; /* allow widget visuals to rise above the title bar */
   position: relative;
   z-index: 2; /* bring content above title */
+  margin-top: -6px; /* lift content slightly so tall icons are not clipped */
 }
 
 /* Status bar with glow effect */
