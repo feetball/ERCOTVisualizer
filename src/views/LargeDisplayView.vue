@@ -3,7 +3,7 @@
     title="Large Display"
     storage-key="large-display-layout"
     :default-layout="defaultLayout"
-    :allow-edit="true"
+    :allow-edit="false"
   />
 </template>
 

@@ -189,12 +189,14 @@ const TOOLBAR_HEIGHT = 45
 const STATUS_BAR_HEIGHT = 24
 const version = (packageInfo as { version: string }).version
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   title: string
   storageKey: string
   defaultLayout: LayoutItem[]
   allowEdit?: boolean
-}>()
+}>(), {
+  allowEdit: true
+})
 
 // Async component loading with error handling
 const ChartWidget = defineAsyncComponent({

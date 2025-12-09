@@ -3,7 +3,7 @@
     title="Grid Summary"
     storage-key="grid-summary-layout"
     :default-layout="defaultLayout"
-    :allow-edit="true"
+    :allow-edit="false"
   />
 </template>
 
