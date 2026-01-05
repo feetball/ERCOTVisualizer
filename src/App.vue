@@ -187,7 +187,15 @@ function copyView(sourceKey: string, sourceName: string) {
   // Copy the layout from the source view
   const sourceLayout = localStorage.getItem(`${sourceKey}-layout`)
   if (sourceLayout) {
-    localStorage.setItem(`custom-view-${newView.id}`, sourceLayout)
+    try {
+      const parsedLayout = JSON.parse(sourceLayout)
+      // Update the view's layout in the store
+      viewsStore.updateViewLayout(newView.id, parsedLayout)
+      // Also copy to localStorage for the custom view
+      localStorage.setItem(`custom-view-${newView.id}`, sourceLayout)
+    } catch (error) {
+      console.error('Failed to parse source layout:', error)
+    }
   }
   
   drawer.value = false
