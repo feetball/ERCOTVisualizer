@@ -157,6 +157,8 @@ import { useRouter } from 'vue-router'
 import { useViewsStore } from '@/stores/views'
 import WelcomeDialog from '@/components/common/WelcomeDialog.vue'
 import packageInfo from '../package.json'
+import { gridSummaryLayout } from '@/views/layouts/gridSummaryLayout'
+import { largeDisplayLayout } from '@/views/layouts/largeDisplayLayout'
 
 const theme = useTheme()
 const router = useRouter()
@@ -184,10 +186,17 @@ function navigate(path: string) {
 function copyView(sourceKey: string, sourceName: string) {
   const newView = viewsStore.createView(`${sourceName} (Copy)`, false)
   
-  // Copy the layout from the source view
-  const sourceLayout = localStorage.getItem(`${sourceKey}-layout`)
-  if (sourceLayout) {
-    localStorage.setItem(`custom-view-${newView.id}`, sourceLayout)
+  // Get the layout based on the source key
+  let layoutToCopy: typeof gridSummaryLayout = []
+  if (sourceKey === 'grid-summary') {
+    layoutToCopy = gridSummaryLayout
+  } else if (sourceKey === 'large-display') {
+    layoutToCopy = largeDisplayLayout
+  }
+  
+  if (layoutToCopy.length > 0) {
+    // Update the view's layout in the store
+    viewsStore.updateViewLayout(newView.id, layoutToCopy)
   }
   
   drawer.value = false
