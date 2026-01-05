@@ -41,6 +41,17 @@ export const useViewsStore = defineStore('views', () => {
     }
   }
 
+  // Update view name
+  function updateViewName(viewId: string, name: string) {
+    if (!viewId || !name || name.trim().length < 2) {
+      return
+    }
+    const view = customViews.value.find(v => v.id === viewId)
+    if (view) {
+      view.name = name.trim()
+    }
+  }
+
   // Delete a view
   function deleteView(viewId: string) {
     const index = customViews.value.findIndex(v => v.id === viewId)
@@ -70,6 +81,7 @@ export const useViewsStore = defineStore('views', () => {
     privateViews,
     createView,
     updateViewLayout,
+    updateViewName,
     deleteView,
     getViewById
   }
