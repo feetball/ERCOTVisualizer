@@ -48,9 +48,17 @@
           <v-list-item-title>{{ view.name }}</v-list-item-title>
           <template #append>
             <v-btn
+              icon="mdi-pencil"
+              variant="text"
+              size="x-small"
+              title="Rename view"
+              @click.stop="confirmEditView(view.id, view.name)"
+            ></v-btn>
+            <v-btn
               icon="mdi-delete"
               variant="text"
               size="x-small"
+              title="Delete view"
               @click.stop="confirmDeleteView(view.id)"
             ></v-btn>
           </template>
@@ -67,9 +75,17 @@
           <v-list-item-title>{{ view.name }}</v-list-item-title>
           <template #append>
             <v-btn
+              icon="mdi-pencil"
+              variant="text"
+              size="x-small"
+              title="Rename view"
+              @click.stop="confirmEditView(view.id, view.name)"
+            ></v-btn>
+            <v-btn
               icon="mdi-delete"
               variant="text"
               size="x-small"
+              title="Delete view"
               @click.stop="confirmDeleteView(view.id)"
             ></v-btn>
           </template>
@@ -147,6 +163,29 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Edit View Name Dialog -->
+    <v-dialog v-model="showEditDialog" max-width="500">
+      <v-card>
+        <v-card-title>Rename View</v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="editViewName"
+            label="View Name"
+            placeholder="My Custom View"
+            variant="outlined"
+            density="compact"
+            autofocus
+            @keyup.enter="saveViewName"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="showEditDialog = false">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" @click="saveViewName" :disabled="!editViewName.trim()">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -166,9 +205,12 @@ const viewsStore = useViewsStore()
 const drawer = ref(false)
 const showNewViewDialog = ref(false)
 const showDeleteDialog = ref(false)
+const showEditDialog = ref(false)
 const newViewName = ref('')
 const newViewIsPublic = ref(false)
 const viewToDelete = ref<string | null>(null)
+const viewToEdit = ref<string | null>(null)
+const editViewName = ref('')
 const version = (packageInfo as { version: string }).version
 
 const privateViews = computed(() => viewsStore.privateViews)
@@ -230,6 +272,25 @@ function deleteView() {
     viewToDelete.value = null
   }
   showDeleteDialog.value = false
+}
+
+function confirmEditView(viewId: string, currentName: string) {
+  viewToEdit.value = viewId
+  editViewName.value = currentName
+  showEditDialog.value = true
+}
+
+function saveViewName() {
+  const trimmedName = editViewName.value.trim()
+  if (!trimmedName || trimmedName.length < 2) return
+  
+  if (viewToEdit.value) {
+    viewsStore.updateViewName(viewToEdit.value, trimmedName)
+    viewToEdit.value = null
+  }
+  
+  showEditDialog.value = false
+  editViewName.value = ''
 }
 </script>
 
