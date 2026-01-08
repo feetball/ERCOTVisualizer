@@ -124,6 +124,9 @@
     <!-- Welcome Dialog -->
     <WelcomeDialog />
 
+    <!-- Vercel Web Analytics -->
+    <Analytics />
+
     <!-- New View Dialog -->
     <v-dialog v-model="showNewViewDialog" max-width="500">
       <v-card>
@@ -195,6 +198,7 @@ import { useTheme } from 'vuetify'
 import { useRouter } from 'vue-router'
 import { useViewsStore } from '@/stores/views'
 import WelcomeDialog from '@/components/common/WelcomeDialog.vue'
+import { Analytics } from '@vercel/analytics/vue'
 import packageInfo from '../package.json'
 import { gridSummaryLayout } from '@/views/layouts/gridSummaryLayout'
 import { largeDisplayLayout } from '@/views/layouts/largeDisplayLayout'
