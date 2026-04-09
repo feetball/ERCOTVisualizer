@@ -5,25 +5,25 @@ import { COLORS } from '@/styles/colors'
 export const gridSummaryLayout: LayoutItem[] = [
   // Row 0: Alert indicators across the top (4 alerts)
   { 
-    i: 'freq-alert', x: 0, y: 0, w: 1, h: 2, type: 'alert', 
+    i: 'freq-alert', x: 0, y: 0, w: 1, h: 3, type: 'alert', 
     title: 'Freq', 
     config: { tag: 'ERCOT.GRID_FREQ', unit: 'Hz', decimals: 3, showLabel: true }, 
     style: {} 
   },
   { 
-    i: 'reserves-alert', x: 1, y: 0, w: 1, h: 2, type: 'alert', 
+    i: 'reserves-alert', x: 1, y: 0, w: 1, h: 3, type: 'alert', 
     title: 'Reserves', 
     config: { tag: 'ERCOT.OP_RESERVES', unit: 'MW', showLabel: true }, 
     style: {} 
   },
   { 
-    i: 'demand-alert', x: 2, y: 0, w: 1, h: 2, type: 'alert', 
+    i: 'demand-alert', x: 2, y: 0, w: 1, h: 3, type: 'alert', 
     title: 'Load', 
     config: { tag: 'ERCOT.SYSTEM_LOAD', unit: 'MW', showLabel: true }, 
     style: {} 
   },
   { 
-    i: 'price-alert', x: 3, y: 0, w: 1, h: 2, type: 'alert', 
+    i: 'price-alert', x: 3, y: 0, w: 1, h: 3, type: 'alert', 
     title: 'Price', 
     config: { tag: 'ERCOT.RT_PRICE', unit: '$', decimals: 0, showLabel: true }, 
     style: {} 

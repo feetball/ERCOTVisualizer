@@ -166,8 +166,8 @@ onUnmounted(() => {
 }
 
 .alert-indicator {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -184,6 +184,6 @@ onUnmounted(() => {
 @keyframes pulse-glow-fast { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
 
 .alert-info { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
-.alert-value { font-size: 0.75rem; font-family: var(--font-mono, monospace); opacity: 0.8; text-shadow: 0 0 14px currentColor; }
-.alert-label { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.95; margin-top: 4px; }
+.alert-value { font-size: 0.7rem; font-family: var(--font-mono, monospace); opacity: 0.8; text-shadow: 0 0 14px currentColor; line-height: 1.2; }
+.alert-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.95; margin-top: 1px; }
 </style>

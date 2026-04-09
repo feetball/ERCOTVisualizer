@@ -404,7 +404,6 @@ onUnmounted(() => {
   min-height: 0;
   overflow: hidden;
   position: relative;
-  z-index: 2;
   padding: 0 4px 4px;
 }
 

@@ -151,7 +151,7 @@ export function useGridLayout(storageKey: string, defaultLayout: LayoutItem[], o
         gauge: { w: 3, h: 5 },
         table: { w: 6, h: 6 },
         ancillary: { w: 6, h: 6 },
-        alert: { w: 1, h: 2 },
+        alert: { w: 1, h: 3 },
         map: { w: 6, h: 8 },
         trend: { w: 3, h: 5 },
         heatcalendar: { w: 6, h: 4 },
