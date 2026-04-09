@@ -350,6 +350,54 @@ function generateOutages(time: Date): number {
   return Math.max(5000, baseOutages + noise)
 }
 
+/**
+ * Region-level data distribution
+ * Models how ERCOT metrics distribute across weather zones
+ */
+export interface RegionData {
+  name: string
+  id: string
+  load: number
+  windGen: number
+  solarGen: number
+  gasGen: number
+  price: number
+}
+
+/** Region distribution weights (approximate, based on real ERCOT zone characteristics) */
+const REGION_WEIGHTS = {
+  north:   { load: 0.28, wind: 0.08, solar: 0.10, gas: 0.25, priceAdj: 0 },
+  houston: { load: 0.30, wind: 0.02, solar: 0.08, gas: 0.30, priceAdj: 2 },
+  south:   { load: 0.18, wind: 0.05, solar: 0.30, gas: 0.15, priceAdj: -1 },
+  west:    { load: 0.08, wind: 0.70, solar: 0.35, gas: 0.10, priceAdj: -5 },
+  coast:   { load: 0.06, wind: 0.10, solar: 0.07, gas: 0.10, priceAdj: 1 },
+  east:    { load: 0.10, wind: 0.05, solar: 0.10, gas: 0.10, priceAdj: 0 },
+} as const
+
+export function generateRegionData(time: Date): RegionData[] {
+  const totalLoad = generateSystemDemand(time)
+  const totalWind = generateWindGeneration(time)
+  const totalSolar = generateSolarGeneration(time)
+  const nuclear = generateNuclearGeneration(time)
+  const coal = generateCoalGeneration(time)
+  const totalGas = generateGasGeneration(totalLoad, totalWind, totalSolar, nuclear, coal)
+  const reserves = 8000 + Math.random() * 4000
+  const basePrice = generatePrice(totalLoad, reserves)
+
+  return Object.entries(REGION_WEIGHTS).map(([id, w]) => {
+    const noise = () => 1 + (Math.random() - 0.5) * 0.1
+    return {
+      id,
+      name: id.charAt(0).toUpperCase() + id.slice(1),
+      load: Math.round(totalLoad * w.load * noise()),
+      windGen: Math.round(totalWind * w.wind * noise()),
+      solarGen: Math.round(totalSolar * w.solar * noise()),
+      gasGen: Math.round(totalGas * w.gas * noise()),
+      price: Math.round((basePrice + w.priceAdj + (Math.random() - 0.5) * 5) * 100) / 100,
+    }
+  })
+}
+
 // Main generator function for a specific tag at a specific time
 function generateValueForTag(tagId: string, time: Date): number {
   switch (tagId.toUpperCase()) {

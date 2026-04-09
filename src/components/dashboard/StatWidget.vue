@@ -1,23 +1,15 @@
 <template>
-  <div class="stat-container fill-height" ref="containerRef">
+  <div class="stat-container" ref="containerRef">
     <div class="stat-content">
-        <div class="stat-value-wrapper">
-          <div ref="valueRef" class="stat-value" :style="[valueStyle, valueTransformStyle]">{{ formattedValue }}</div>
-        </div>
+      <div class="stat-value-wrapper">
+        <div ref="valueRef" class="stat-value" :style="[valueStyle, valueTransformStyle]">{{ formattedValue }}</div>
+      </div>
       <div class="trend-row" :style="{ color: trendColor }">
-        <v-icon :size="trendIconSize" :color="trendColor">{{ trendIcon }}</v-icon>
+        <component :is="trendIconComponent" :size="trendIconSize" />
         <span class="trend-text" :style="{ fontSize: trendFontSize }">{{ trendText }}</span>
       </div>
     </div>
-    <div class="sparkline-area" v-if="sparklineData.length > 0">
-      <apexchart
-        type="area"
-        height="100%"
-        width="100%"
-        :options="sparklineOptions"
-        :series="sparklineSeries"
-      ></apexchart>
-    </div>
+    <div class="sparkline-area" v-if="sparklineData.length > 0" ref="sparklineEl"></div>
   </div>
 </template>
 
@@ -26,6 +18,9 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { dataService } from '@/services/dataService'
 import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
 import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
+import { useECharts } from '@/composables/useECharts'
+import { areaGradient } from '@/styles/echarts-theme'
+import { TrendingUp, TrendingDown, Minus } from 'lucide-vue-next'
 
 interface DataPoint {
   Timestamp: string
@@ -39,6 +34,7 @@ const props = defineProps<{
 
 const containerRef = ref<HTMLElement | null>(null)
 const valueRef = ref<HTMLElement | null>(null)
+const sparklineEl = ref<HTMLElement | null>(null)
 const scale = ref(1)
 const containerWidth = ref(200)
 const containerHeight = ref(150)
@@ -48,7 +44,9 @@ const sparklineData = ref<number[]>([])
 let intervalId: ReturnType<typeof setInterval> | null = null
 let resizeObserver: ResizeObserver | null = null
 
-// Determine if this is Hz (for decimal formatting)
+// ECharts sparkline
+const { setOption: setSparklineOption } = useECharts(sparklineEl)
+
 const isHz = computed(() => {
   const tag = props.config?.tag || ''
   const unit = props.config?.unit || ''
@@ -58,8 +56,6 @@ const isHz = computed(() => {
 const formattedValue = computed(() => {
   if (currentValue.value === null) return '---'
   const val = safeCalculate(currentValue.value, props.config?.calculation)
-  
-  // Hz gets configured decimals, MW/other gets whole numbers with commas
   let formatted: string
   if (isHz.value) {
     formatted = val.toFixed(props.config?.decimals ?? 2)
@@ -68,8 +64,6 @@ const formattedValue = computed(() => {
   } else {
     formatted = Math.round(val).toLocaleString()
   }
-  
-  // Append unit if provided
   if (props.config?.unit) {
     if (props.config.unit.trim() === '$') {
       formatted = '$' + formatted
@@ -77,34 +71,24 @@ const formattedValue = computed(() => {
       formatted += ' ' + props.config.unit
     }
   }
-  
   return formatted
 })
 
-// Auto-scaling font size based on container width
 const valueFontSize = computed(() => {
-  // Scale based on container width/height and value length for responsive sizing
   const width = containerWidth.value || 200
   const height = containerHeight.value || 150
-  const text = formattedValue.value || ''
-  const len = Math.max(1, text.length)
-
-  // Heuristic: reserve more horizontal space for shorter values
+  const len = Math.max(1, (formattedValue.value || '').length)
   const horizontalScale = width / (4 + len * 0.12)
   const verticalScale = height / 2.8
   const baseSize = Math.min(horizontalScale, verticalScale)
-
-  // Clamp to reasonable bounds
-  const clampedSize = Math.max(14, Math.min(baseSize, 140))
-  return `${Math.round(clampedSize)}px`
+  return `${Math.round(Math.max(14, Math.min(baseSize, 140)))}px`
 })
 
 const trendFontSize = computed(() => {
   const width = containerWidth.value || 200
   const height = containerHeight.value || 150
   const baseSize = Math.min(width / 14, height / 10)
-  const clampedSize = Math.max(9, Math.min(baseSize, 22))
-  return `${Math.round(clampedSize)}px`
+  return `${Math.round(Math.max(9, Math.min(baseSize, 22)))}px`
 })
 
 const trendIconSize = computed(() => {
@@ -117,15 +101,15 @@ const trendIconSize = computed(() => {
 const valueStyle = computed(() => ({
   color: props.styleConfig?.valueColor || '#FFFFFF',
   fontSize: valueFontSize.value,
-  whiteSpace: 'nowrap',
+  whiteSpace: 'nowrap' as const,
   display: 'inline-block',
-  transformOrigin: 'center center'
+  transformOrigin: 'center center',
 }))
 
 const valueTransformStyle = computed(() => ({
   transform: `scale(${scale.value})`,
   display: 'inline-block',
-  willChange: 'transform'
+  willChange: 'transform' as const,
 }))
 
 const trendDirection = computed(() => {
@@ -134,15 +118,15 @@ const trendDirection = computed(() => {
 })
 
 const trendColor = computed(() => {
-  if (trendDirection.value > 0) return '#4CAF50'
-  if (trendDirection.value < 0) return '#F44336'
-  return '#9E9E9E'
+  if (trendDirection.value > 0) return '#22c55e'
+  if (trendDirection.value < 0) return '#ef4444'
+  return '#6b7280'
 })
 
-const trendIcon = computed(() => {
-  if (trendDirection.value > 0) return 'mdi-trending-up'
-  if (trendDirection.value < 0) return 'mdi-trending-down'
-  return 'mdi-trending-neutral'
+const trendIconComponent = computed(() => {
+  if (trendDirection.value > 0) return TrendingUp
+  if (trendDirection.value < 0) return TrendingDown
+  return Minus
 })
 
 const trendText = computed(() => {
@@ -152,48 +136,44 @@ const trendText = computed(() => {
   return `${diff >= 0 ? '+' : ''}${pct}%`
 })
 
-const sparklineOptions = computed(() => ({
-  chart: {
-    type: 'area',
-    sparkline: { enabled: true },
-    animations: { enabled: false }
-  },
-  stroke: { curve: 'smooth', width: 2 },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shadeIntensity: 1,
-      opacityFrom: 0.4,
-      opacityTo: 0.1
-    }
-  },
-  colors: [props.styleConfig?.valueColor || '#90CAF9'],
-  tooltip: { enabled: false }
-}))
-
-const sparklineSeries = computed(() => [{
-  name: 'trend',
-  data: sparklineData.value
-}])
+function updateSparkline() {
+  if (sparklineData.value.length === 0) return
+  const color = props.styleConfig?.valueColor || '#06b6d4'
+  setSparklineOption({
+    animation: false,
+    grid: { left: 0, right: 0, top: 0, bottom: 0 },
+    xAxis: { type: 'category', show: false, data: sparklineData.value.map((_, i) => i) },
+    yAxis: {
+      type: 'value',
+      show: false,
+      min: (value: { min: number }) => value.min * 0.98,
+      max: (value: { max: number }) => value.max * 1.02,
+    },
+    series: [{
+      type: 'line',
+      smooth: 0.4,
+      symbol: 'none',
+      lineStyle: { width: 2, color },
+      areaStyle: { color: areaGradient(color, 0.4, 0.05) },
+      data: sparklineData.value,
+    }],
+  })
+}
 
 async function fetchData() {
   if (!props.config?.tag) return
   try {
-    // Get current value
     const data = await dataService.getStreamValue(props.config.tag)
     previousValue.value = currentValue.value
     currentValue.value = data.Value
 
-    // Get sparkline data (last hour, 20 points)
     const endTime = new Date()
     const startTime = new Date(endTime.getTime() - 60 * 60 * 1000)
     const historical: DataPoint[] = await dataService.getStreamPlot(
-      props.config.tag,
-      startTime.toISOString(),
-      endTime.toISOString(),
-      20
+      props.config.tag, startTime.toISOString(), endTime.toISOString(), 20
     )
-    sparklineData.value = historical.map((d) => d.Value)
+    sparklineData.value = historical.map(d => d.Value)
+    updateSparkline()
   } catch (error) {
     console.error('Error fetching stat data:', error)
   }
@@ -204,52 +184,34 @@ function updateSize() {
     containerWidth.value = containerRef.value.offsetWidth
     containerHeight.value = containerRef.value.offsetHeight
   }
-  // Recompute text scale after size changes
   computeScale()
 }
 
 function computeScale() {
   nextTick(() => {
-    if (!valueRef.value || !containerRef.value) {
-      scale.value = 1
-      return
-    }
-
+    if (!valueRef.value || !containerRef.value) { scale.value = 1; return }
     const padding = 16
     const availableW = Math.max(20, containerWidth.value - padding)
-    // Reserve headroom for trend row and sparkline; keep more height on mobile to prevent clipping
     const sparklineReserve = containerHeight.value < 260 ? containerHeight.value * 0.35 : containerHeight.value * 0.3
     const trendReserve = 32
     const availableH = Math.max(24, containerHeight.value - padding - sparklineReserve - trendReserve)
-
-    const measuredW = valueRef.value.scrollWidth || valueRef.value.offsetWidth || 1
-    const measuredH = valueRef.value.scrollHeight || valueRef.value.offsetHeight || 1
-
+    const measuredW = valueRef.value.scrollWidth || 1
+    const measuredH = valueRef.value.scrollHeight || 1
     const sW = availableW / measuredW
     const sH = availableH / measuredH
-    const newScale = Math.min(1, sW, sH)
-    // Clamp to reasonable lower bound so it remains readable
-    scale.value = Math.max(0.5, Math.min(1, newScale))
+    scale.value = Math.max(0.5, Math.min(1, sW, sH))
   })
 }
 
 onMounted(() => {
   fetchData()
-  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL * 2) // Refresh every 10s for stats
-  
-  // Set up resize observer for responsive sizing
+  intervalId = setInterval(fetchData, WIDGET_REFRESH_INTERVAL * 2)
   if (containerRef.value) {
-    resizeObserver = new ResizeObserver(() => {
-      updateSize()
-    })
+    resizeObserver = new ResizeObserver(() => updateSize())
     resizeObserver.observe(containerRef.value)
     updateSize()
   }
-  
-  // Recompute when value changes
-  watch(formattedValue, () => {
-    computeScale()
-  })
+  watch(formattedValue, () => computeScale())
 })
 
 onUnmounted(() => {
@@ -266,7 +228,7 @@ onUnmounted(() => {
   height: 100%;
   padding: 8px;
   box-sizing: border-box;
-  overflow: visible; /* allow scaled text to flow without clipping */
+  overflow: visible;
   position: relative;
 }
 
@@ -328,29 +290,11 @@ onUnmounted(() => {
   opacity: 0.9;
 }
 
-/* Mobile optimizations */
 @media (max-width: 599px) {
-  .stat-container {
-    padding: 12px 8px;
-  }
-  
-  .stat-content {
-    padding: 4px 0;
-  }
-  
-  .stat-value {
-    letter-spacing: -0.01em;
-    padding: 4px 0;
-  }
-  
-  .trend-row {
-    margin-top: 8px;
-    padding: 6px 14px;
-  }
-  
-  .sparkline-area {
-    flex: 0 0 30%;
-    min-height: 40px;
-  }
+  .stat-container { padding: 12px 8px; }
+  .stat-content { padding: 4px 0; }
+  .stat-value { letter-spacing: -0.01em; padding: 4px 0; }
+  .trend-row { margin-top: 8px; padding: 6px 14px; }
+  .sparkline-area { flex: 0 0 30%; min-height: 40px; }
 }
 </style>

@@ -1,365 +1,156 @@
 <template>
-  <v-container fluid class="pa-0 help-container">
-    <v-app-bar color="surface" density="compact" :height="45">
-      <v-toolbar-title class="text-body-1 font-weight-medium">Help & Documentation</v-toolbar-title>
-    </v-app-bar>
+  <div class="help-container">
+    <header class="help-header">
+      <h1 class="tw-text-sm tw-font-semibold tw-text-foreground">Help & Documentation</h1>
+    </header>
 
-    <v-container class="help-content pa-6">
-      <v-row>
-        <v-col cols="12" lg="8" offset-lg="2">
-          <!-- Getting Started -->
-          <v-card class="mb-6">
-            <v-card-title class="bg-primary">
-              <v-icon class="mr-2">mdi-rocket-launch</v-icon>
-              Getting Started
-            </v-card-title>
-            <v-card-text class="pa-4">
-              <p class="text-body-1 mb-3">
-                Welcome to ERCOT Grid Visualizer! This application provides real-time monitoring 
-                of the Electric Reliability Council of Texas (ERCOT) grid operations.
-              </p>
-              <v-list density="compact">
-                <v-list-item prepend-icon="mdi-chart-line">
-                  <v-list-item-title><strong>Grid Summary</strong></v-list-item-title>
-                  <v-list-item-subtitle>View live grid metrics, generation mix, and system demand</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-monitor">
-                  <v-list-item-title><strong>Large Display</strong></v-list-item-title>
-                  <v-list-item-subtitle>Full-screen view optimized for large monitors and displays</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-view-dashboard">
-                  <v-list-item-title><strong>My Views</strong></v-list-item-title>
-                  <v-list-item-subtitle>Create and manage custom dashboard layouts</v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-            </v-card-text>
-          </v-card>
+    <div class="help-content">
+      <div class="tw-max-w-3xl tw-mx-auto tw-space-y-6 tw-p-6">
 
-          <!-- Creating and Editing Views -->
-          <v-card class="mb-6">
-            <v-card-title class="bg-primary">
-              <v-icon class="mr-2">mdi-pencil</v-icon>
-              Creating and Editing Views
-            </v-card-title>
-            <v-card-text class="pa-4">
-              <h3 class="text-h6 mb-3">1. Enter Edit Mode</h3>
-              <p class="mb-4">
-                Click the <v-chip size="small" color="primary" class="mx-1">Edit</v-chip> button in the top toolbar 
-                to enable editing. In edit mode, you can:
-              </p>
-              <v-list density="compact" class="mb-4">
-                <v-list-item prepend-icon="mdi-drag">Drag widgets to reposition them</v-list-item>
-                <v-list-item prepend-icon="mdi-resize">Resize widgets by dragging corners</v-list-item>
-                <v-list-item prepend-icon="mdi-pencil">Edit widget settings</v-list-item>
-                <v-list-item prepend-icon="mdi-delete">Remove unwanted widgets</v-list-item>
-              </v-list>
+        <HelpCard title="Getting Started" :icon="Rocket">
+          <p class="tw-text-sm tw-text-foreground/80 tw-mb-3">
+            Welcome to ERCOT Grid Visualizer! This application provides real-time monitoring
+            of the Electric Reliability Council of Texas (ERCOT) grid operations.
+          </p>
+          <HelpListItem :icon="LineChart" title="Grid Summary" description="View live grid metrics, generation mix, and system demand" />
+          <HelpListItem :icon="Monitor" title="Large Display" description="Full-screen view optimized for large monitors" />
+          <HelpListItem :icon="LayoutDashboard" title="My Views" description="Create and manage custom dashboard layouts" />
+          <HelpListItem :icon="MapPin" title="ERCOT Map" description="Interactive geographic visualization of the Texas grid" />
+        </HelpCard>
 
-              <h3 class="text-h6 mb-3">2. Add Widgets</h3>
-              <p class="mb-3">
-                While in edit mode, click <v-chip size="small" color="primary" class="mx-1">+ Add Widget</v-chip> 
-                to add new visualizations:
-              </p>
-              <v-list density="compact" class="mb-4">
-                <v-list-item prepend-icon="mdi-chart-line">
-                  <v-list-item-title><strong>Chart</strong></v-list-item-title>
-                  <v-list-item-subtitle>Time series line chart for trend analysis</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-poll">
-                  <v-list-item-title><strong>Stat</strong></v-list-item-title>
-                  <v-list-item-subtitle>Grafana-style stat with sparkline and trend indicator. Features white text values and light blue sparklines by default.</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-gauge">
-                  <v-list-item-title><strong>Gauge</strong></v-list-item-title>
-                  <v-list-item-subtitle>Radial gauge for percentage-based metrics</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-numeric">
-                  <v-list-item-title><strong>Single Value</strong></v-list-item-title>
-                  <v-list-item-subtitle>Display a single current value</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-table">
-                  <v-list-item-title><strong>Data Table</strong></v-list-item-title>
-                  <v-list-item-subtitle>Tabular data display</v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
+        <HelpCard title="Creating and Editing Views" :icon="PencilRuler">
+          <h3 class="tw-text-sm tw-font-semibold tw-text-foreground tw-mb-2">1. Enter Edit Mode</h3>
+          <p class="tw-text-sm tw-text-foreground/80 tw-mb-3">
+            Click the <span class="tw-px-2 tw-py-0.5 tw-rounded tw-bg-primary/20 tw-text-primary tw-text-xs tw-font-medium">Edit</span>
+            button in the top toolbar to enable editing.
+          </p>
 
-              <h3 class="text-h6 mb-3">3. Configure Widgets</h3>
-              <p class="mb-3">Each widget has four configuration tabs:</p>
-              <v-expansion-panels class="mb-4">
-                <v-expansion-panel>
-                  <v-expansion-panel-title>
-                    <v-icon class="mr-2">mdi-cog</v-icon>
-                    General Settings
-                  </v-expansion-panel-title>
-                  <v-expansion-panel-text>
-                    Set the widget type and title.
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-                <v-expansion-panel>
-                  <v-expansion-panel-title>
-                    <v-icon class="mr-2">mdi-database</v-icon>
-                    Data Source
-                  </v-expansion-panel-title>
-                  <v-expansion-panel-text>
-                    Select ERCOT data tags, set time duration, and configure display options like units and decimal places.
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-                <v-expansion-panel>
-                  <v-expansion-panel-title>
-                    <v-icon class="mr-2">mdi-function-variant</v-icon>
-                    Calculations
-                  </v-expansion-panel-title>
-                  <v-expansion-panel-text>
-                    Apply custom JavaScript calculations to transform data (e.g., unit conversions, formulas).
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-                <v-expansion-panel>
-                  <v-expansion-panel-title>
-                    <v-icon class="mr-2">mdi-palette</v-icon>
-                    Styling
-                  </v-expansion-panel-title>
-                  <v-expansion-panel-text>
-                    Customize colors, fonts, and appearance. Stat widgets use white text and light blue sparklines by default, with green/red trend indicators for up/down changes.
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-              </v-expansion-panels>
+          <h3 class="tw-text-sm tw-font-semibold tw-text-foreground tw-mb-2">2. Available Widgets</h3>
+          <div class="tw-space-y-1 tw-mb-4">
+            <HelpListItem :icon="LineChart" title="Chart / Stacked Chart" description="Time series and stacked area charts" />
+            <HelpListItem :icon="Activity" title="Stat / Trend / Gauge" description="Current values with sparklines, trends, and gauges" />
+            <HelpListItem :icon="MapPin" title="ERCOT Map" description="Interactive geographic grid visualization" />
+            <HelpListItem :icon="Grid3x3" title="Mini Dashboard" description="Compact multi-metric overview" />
+            <HelpListItem :icon="CalendarDays" title="Heat Calendar" description="90-day historical heatmap" />
+            <HelpListItem :icon="Bell" title="Alert Indicator" description="Color-coded status for critical metrics" />
+          </div>
 
-              <h3 class="text-h6 mb-3">4. Save Your Layout</h3>
-              <p class="mb-3">
-                Click <v-chip size="small" color="primary" class="mx-1">Done</v-chip> when finished editing. 
-                Your layout is automatically saved to your browser's local storage.
-              </p>
+          <h3 class="tw-text-sm tw-font-semibold tw-text-foreground tw-mb-2">3. Save Your Layout</h3>
+          <p class="tw-text-sm tw-text-foreground/80">
+            Click <span class="tw-px-2 tw-py-0.5 tw-rounded tw-bg-primary/20 tw-text-primary tw-text-xs tw-font-medium">Done</span>
+            when finished. Layouts are saved to your browser's local storage.
+          </p>
+        </HelpCard>
 
-              <h3 class="text-h6 mb-3">5. Create New Views</h3>
-              <p class="mb-3">
-                Click <v-chip size="small" color="primary" class="mx-1">+ New View</v-chip> in the navigation drawer to create a custom view:
-              </p>
-              <v-list density="compact">
-                <v-list-item prepend-icon="mdi-account">
-                  <v-list-item-title><strong>Private View</strong></v-list-item-title>
-                  <v-list-item-subtitle>Only visible to you (saved in browser)</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-earth">
-                  <v-list-item-title><strong>Public View</strong></v-list-item-title>
-                  <v-list-item-subtitle>Share with others via URL</v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-            </v-card-text>
-          </v-card>
+        <HelpCard title="Available ERCOT Data" :icon="Database">
+          <div class="tw-overflow-x-auto">
+            <table class="tw-w-full tw-text-sm">
+              <thead>
+                <tr class="tw-border-b tw-border-border/50">
+                  <th class="tw-text-left tw-py-2 tw-pr-4 tw-text-xs tw-font-semibold tw-text-muted-foreground tw-uppercase">Metric</th>
+                  <th class="tw-text-left tw-py-2 tw-pr-4 tw-text-xs tw-font-semibold tw-text-muted-foreground tw-uppercase">Description</th>
+                  <th class="tw-text-left tw-py-2 tw-text-xs tw-font-semibold tw-text-muted-foreground tw-uppercase">Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="metric in metrics" :key="metric.name" class="tw-border-b tw-border-border/20">
+                  <td class="tw-py-1.5 tw-pr-4 tw-font-medium tw-text-foreground">{{ metric.name }}</td>
+                  <td class="tw-py-1.5 tw-pr-4 tw-text-foreground/70">{{ metric.desc }}</td>
+                  <td class="tw-py-1.5 tw-text-foreground/70">{{ metric.unit }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </HelpCard>
 
-          <!-- Available Data -->
-          <v-card class="mb-6">
-            <v-card-title class="bg-primary">
-              <v-icon class="mr-2">mdi-database-outline</v-icon>
-              Available ERCOT Data
-            </v-card-title>
-            <v-card-text class="pa-4">
-              <p class="mb-4">
-                The following real-time ERCOT grid metrics are available for visualization:
-              </p>
-              <v-simple-table density="compact">
-                <template #default>
-                  <thead>
-                    <tr>
-                      <th>Metric</th>
-                      <th>Description</th>
-                      <th>Unit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><strong>Grid Frequency</strong></td>
-                      <td>Current grid frequency</td>
-                      <td>Hz</td>
-                    </tr>
-                    <tr>
-                      <td><strong>System Demand</strong></td>
-                      <td>Total system load</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Wind Generation</strong></td>
-                      <td>Wind power output</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Solar Generation</strong></td>
-                      <td>Solar power output</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Natural Gas</strong></td>
-                      <td>Gas generation</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Nuclear</strong></td>
-                      <td>Nuclear generation</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Coal</strong></td>
-                      <td>Coal generation</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Battery Storage</strong></td>
-                      <td>Net storage output/input</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Operating Reserves</strong></td>
-                      <td>Available spinning reserves</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Available Capacity</strong></td>
-                      <td>Total available capacity</td>
-                      <td>MW</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Real-Time Price</strong></td>
-                      <td>Hub average price</td>
-                      <td>$/MWh</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Outages</strong></td>
-                      <td>Total forced outages</td>
-                      <td>MW</td>
-                    </tr>
-                  </tbody>
-                </template>
-              </v-simple-table>
-            </v-card-text>
-          </v-card>
+        <HelpCard title="Tips & Keyboard Shortcuts" :icon="Lightbulb">
+          <HelpListItem :icon="Smartphone" title="Responsive" description="Adapts to mobile, tablet, desktop, and large displays" />
+          <HelpListItem :icon="RefreshCw" title="Auto-Refresh" description="Data refreshes every 5-30 seconds depending on widget type" />
+          <HelpListItem :icon="SunMoon" title="Theme" description="Toggle dark/light mode from the header" />
+          <div class="tw-mt-3 tw-space-y-1">
+            <div class="tw-flex tw-gap-4 tw-text-sm"><kbd>E</kbd> <span class="tw-text-foreground/70">Toggle edit mode</span></div>
+            <div class="tw-flex tw-gap-4 tw-text-sm"><kbd>F11</kbd> <span class="tw-text-foreground/70">Fullscreen</span></div>
+            <div class="tw-flex tw-gap-4 tw-text-sm"><kbd>Esc</kbd> <span class="tw-text-foreground/70">Exit edit / close dialogs</span></div>
+          </div>
+        </HelpCard>
 
-          <!-- Tips & Best Practices -->
-          <v-card class="mb-6">
-            <v-card-title class="bg-primary">
-              <v-icon class="mr-2">mdi-lightbulb-on</v-icon>
-              Tips & Best Practices
-            </v-card-title>
-            <v-card-text class="pa-4">
-              <v-list density="compact">
-                <v-list-item prepend-icon="mdi-responsive">
-                  <v-list-item-title><strong>Responsive Design</strong></v-list-item-title>
-                  <v-list-item-subtitle>The dashboard adapts to mobile, tablet, desktop, and large displays</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-refresh">
-                  <v-list-item-title><strong>Auto-Refresh</strong></v-list-item-title>
-                  <v-list-item-subtitle>Data automatically refreshes every 5-10 seconds</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-theme-light-dark">
-                  <v-list-item-title><strong>Dark/Light Theme</strong></v-list-item-title>
-                  <v-list-item-subtitle>Toggle theme using the icon in the top-right corner</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-backup-restore">
-                  <v-list-item-title><strong>Reset Layout</strong></v-list-item-title>
-                  <v-list-item-subtitle>Use the Reset button in edit mode to restore default layout</v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item prepend-icon="mdi-fullscreen">
-                  <v-list-item-title><strong>Full Screen Mode</strong></v-list-item-title>
-                  <v-list-item-subtitle>Use browser's fullscreen (F11) for kiosk or large display mode</v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-            </v-card-text>
-          </v-card>
-
-          <!-- Keyboard Shortcuts -->
-          <v-card class="mb-6">
-            <v-card-title class="bg-primary">
-              <v-icon class="mr-2">mdi-keyboard</v-icon>
-              Keyboard Shortcuts
-            </v-card-title>
-            <v-card-text class="pa-4">
-              <v-simple-table density="compact">
-                <template #default>
-                  <thead>
-                    <tr>
-                      <th>Shortcut</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><kbd>E</kbd></td>
-                      <td>Toggle edit mode</td>
-                    </tr>
-                    <tr>
-                      <td><kbd>F11</kbd></td>
-                      <td>Enter/exit fullscreen</td>
-                    </tr>
-                    <tr>
-                      <td><kbd>Esc</kbd></td>
-                      <td>Exit edit mode or close dialogs</td>
-                    </tr>
-                  </tbody>
-                </template>
-              </v-simple-table>
-            </v-card-text>
-          </v-card>
-
-          <!-- Support -->
-          <v-card>
-            <v-card-title class="bg-primary">
-              <v-icon class="mr-2">mdi-help-circle</v-icon>
-              Need More Help?
-            </v-card-title>
-            <v-card-text class="pa-4">
-              <p class="text-body-1">
-                For additional support or to report issues, visit the project repository:
-              </p>
-              <v-btn
-                href="https://github.com/feetball/ERCOTVisualizer"
-                target="_blank"
-                color="primary"
-                variant="outlined"
-                prepend-icon="mdi-github"
-                class="mt-3"
-              >
-                GitHub Repository
-              </v-btn>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-container>
+        <div class="glass-card-solid tw-p-6 tw-text-center">
+          <p class="tw-text-sm tw-text-foreground/80 tw-mb-3">For additional support or to report issues:</p>
+          <a
+            href="https://github.com/feetball/ERCOTVisualizer"
+            target="_blank"
+            class="tw-inline-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-md tw-border tw-border-primary tw-text-primary tw-text-sm tw-font-medium hover:tw-bg-primary/10 tw-transition-colors"
+          >
+            <Github :size="16" />
+            GitHub Repository
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-// Help view - no script logic needed
+import { type Component } from 'vue'
+import {
+  Rocket, LineChart, Monitor, LayoutDashboard, MapPin, PencilRuler,
+  Activity, Grid3x3, CalendarDays, Bell, Database, Lightbulb,
+  Smartphone, RefreshCw, SunMoon, Github,
+} from 'lucide-vue-next'
+
+const metrics = [
+  { name: 'Grid Frequency', desc: 'Current grid frequency', unit: 'Hz' },
+  { name: 'System Demand', desc: 'Total system load', unit: 'MW' },
+  { name: 'Wind Generation', desc: 'Wind power output', unit: 'MW' },
+  { name: 'Solar Generation', desc: 'Solar power output', unit: 'MW' },
+  { name: 'Natural Gas', desc: 'Gas generation', unit: 'MW' },
+  { name: 'Nuclear', desc: 'Nuclear generation', unit: 'MW' },
+  { name: 'Coal', desc: 'Coal generation', unit: 'MW' },
+  { name: 'Battery Storage', desc: 'Net storage output/input', unit: 'MW' },
+  { name: 'Operating Reserves', desc: 'Available spinning reserves', unit: 'MW' },
+  { name: 'Available Capacity', desc: 'Total available capacity', unit: 'MW' },
+  { name: 'Real-Time Price', desc: 'Hub average price', unit: '$/MWh' },
+  { name: 'Outages', desc: 'Total forced outages', unit: 'MW' },
+]
+
+// Sub-components
+const HelpCard = {
+  props: { title: String, icon: Object },
+  template: `
+    <div class="glass-card-solid tw-p-5">
+      <h2 class="tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-foreground tw-mb-3">
+        <component :is="icon" :size="18" class="tw-text-primary" />
+        {{ title }}
+      </h2>
+      <slot />
+    </div>
+  `,
+} as Component
+
+const HelpListItem = {
+  props: { icon: Object, title: String, description: String },
+  template: `
+    <div class="tw-flex tw-items-start tw-gap-3 tw-py-1.5">
+      <component :is="icon" :size="14" class="tw-mt-0.5 tw-shrink-0 tw-text-primary/70" />
+      <div>
+        <span class="tw-text-sm tw-font-medium tw-text-foreground">{{ title }}</span>
+        <span class="tw-text-sm tw-text-foreground/60"> — {{ description }}</span>
+      </div>
+    </div>
+  `,
+} as Component
 </script>
 
 <style scoped>
-.help-container {
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.help-container { display: flex; flex-direction: column; height: 100vh; max-height: 100vh; overflow: hidden; }
+.help-header {
+  padding: 12px 16px; border-bottom: 1px solid hsla(var(--border), 0.5);
+  background: hsl(var(--card)); flex-shrink: 0;
 }
-
-.help-content {
-  flex: 1;
-  overflow-y: auto;
-}
-
+.help-content { flex: 1; overflow-y: auto; }
 kbd {
-  background-color: #f5f5f5;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.2);
-  color: #333;
-  display: inline-block;
-  font-family: monospace;
-  font-size: 0.85em;
-  padding: 2px 6px;
-  white-space: nowrap;
-}
-
-.v-theme--dark kbd {
-  background-color: #424242;
-  border-color: #616161;
-  color: #fff;
+  background: hsla(var(--muted), 0.5); border: 1px solid hsla(var(--border), 0.5);
+  border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: 0.8em;
+  color: hsl(var(--foreground));
 }
 </style>

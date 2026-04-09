@@ -5,16 +5,15 @@
     :storage-key="`custom-view-${viewId}`"
     :default-layout="currentView.layout"
   />
-  <v-container v-else class="d-flex align-center justify-center fill-height">
-    <v-card max-width="400">
-      <v-card-title>View Not Found</v-card-title>
-      <v-card-text>The requested view does not exist or has been deleted.</v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" variant="flat" to="/">Go to Grid Summary</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-container>
+  <div v-else class="tw-flex tw-items-center tw-justify-center tw-h-full">
+    <div class="glass-card-solid tw-max-w-sm tw-p-6 tw-text-center">
+      <h2 class="tw-text-lg tw-font-semibold tw-text-foreground tw-mb-2">View Not Found</h2>
+      <p class="tw-text-sm tw-text-muted-foreground tw-mb-4">The requested view does not exist or has been deleted.</p>
+      <router-link to="/" class="tw-inline-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-md tw-bg-primary tw-text-primary-foreground tw-text-sm tw-font-medium hover:tw-bg-primary/90 tw-transition-colors">
+        Go to Grid Summary
+      </router-link>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">

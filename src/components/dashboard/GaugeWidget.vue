@@ -1,13 +1,5 @@
 <template>
-  <div class="gauge-container fill-height">
-    <apexchart
-      type="radialBar"
-      width="100%"
-      height="100%"
-      :options="gaugeOptions"
-      :series="series"
-    ></apexchart>
-  </div>
+  <div class="gauge-container" ref="chartEl"></div>
 </template>
 
 <script setup lang="ts">
@@ -15,43 +7,39 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { dataService } from '@/services/dataService'
 import { safeCalculate, WIDGET_REFRESH_INTERVAL } from '@/types/widget'
 import type { BaseWidgetConfig, WidgetStyle } from '@/types/widget'
+import { useECharts, type EChartsOption } from '@/composables/useECharts'
+import { ANIMATION_DEFAULTS } from '@/styles/echarts-theme'
 
 const props = defineProps<{
   config: BaseWidgetConfig
   styleConfig?: WidgetStyle
 }>()
 
+const chartEl = ref<HTMLElement | null>(null)
+const { setOption } = useECharts(chartEl)
 const currentValue = ref<number | null>(null)
 let intervalId: ReturnType<typeof setInterval> | null = null
 
-// Determine if this is Hz (for decimal formatting)
 const isHz = computed(() => {
   const tag = props.config?.tag || ''
   const unit = props.config?.unit || ''
   return tag.includes('FREQ') || unit.toLowerCase().includes('hz')
 })
 
-// Get min/max with safe defaults
 const min = computed(() => props.config?.min ?? 0)
 const max = computed(() => props.config?.max ?? 100)
 
-// Calculate percentage for gauge (0-100)
 const percentage = computed(() => {
   if (currentValue.value === null) return 0
   const val = safeCalculate(currentValue.value, props.config.calculation)
   const range = max.value - min.value
-  // Guard against division by zero
   if (range === 0) return 50
-  const pct = ((val - min.value) / range) * 100
-  return Math.max(0, Math.min(100, pct))
+  return Math.max(0, Math.min(100, ((val - min.value) / range) * 100))
 })
-
-const series = computed(() => [percentage.value])
 
 const displayValue = computed(() => {
   if (currentValue.value === null) return '---'
   const val = safeCalculate(currentValue.value, props.config.calculation)
-  // Hz gets 2 decimals, MW gets 0 decimals
   const decimals = props.config?.decimals ?? (isHz.value ? 2 : 0)
   return val.toFixed(decimals)
 })
@@ -59,99 +47,81 @@ const displayValue = computed(() => {
 const gaugeColor = computed(() => {
   const pct = percentage.value
   if (props.styleConfig?.valueColor) return props.styleConfig.valueColor
-  // Default: green < 60, yellow 60-80, red > 80
-  if (pct < 60) return '#4CAF50'
-  if (pct < 80) return '#FFC107'
-  return '#F44336'
+  if (pct < 60) return '#22c55e'
+  if (pct < 80) return '#f59e0b'
+  return '#ef4444'
 })
 
-const gaugeOptions = computed(() => ({
-  chart: {
-    type: 'radialBar',
-    offsetY: -10,
-    sparkline: { enabled: true },
-    dropShadow: {
-      enabled: true,
-      top: 0,
-      left: 0,
-      blur: 15,
-      color: gaugeColor.value,
-      opacity: 0.4
-    }
-  },
-  plotOptions: {
-    radialBar: {
-      startAngle: -135,
-      endAngle: 135,
-      hollow: {
-        margin: 0,
-        size: '65%',
-        background: 'transparent',
-        dropShadow: {
-          enabled: true,
-          top: 3,
-          left: 0,
-          blur: 10,
-          opacity: 0.3
-        }
-      },
-      track: {
-        background: 'rgba(255,255,255,0.1)',
-        strokeWidth: '100%',
-        margin: 5,
-        dropShadow: {
-          enabled: true,
-          top: 2,
-          left: 0,
-          blur: 4,
-          opacity: 0.15
-        }
-      },
-      dataLabels: {
-        name: {
-          show: true,
-          fontSize: '11px',
-          color: 'rgba(255,255,255,0.6)',
-          offsetY: 55,
-          fontWeight: 500
+function buildOption(): EChartsOption {
+  const color = gaugeColor.value
+  return {
+    ...ANIMATION_DEFAULTS,
+    series: [{
+      type: 'gauge',
+      startAngle: 220,
+      endAngle: -40,
+      radius: '90%',
+      center: ['50%', '55%'],
+      min: 0,
+      max: 100,
+      progress: {
+        show: true,
+        width: 14,
+        roundCap: true,
+        itemStyle: {
+          color: {
+            type: 'linear',
+            x: 0, y: 0, x2: 1, y2: 0,
+            colorStops: [
+              { offset: 0, color },
+              { offset: 1, color: lighten(color, 25) },
+            ],
+          },
+          shadowColor: color,
+          shadowBlur: 12,
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
         },
-        value: {
-          show: true,
-          fontSize: '22px',
-          fontWeight: 700,
-          color: props.styleConfig?.valueColor || '#fff',
-          offsetY: -5,
-          formatter: () => displayValue.value + (props.config?.unit ? props.config.unit : '')
-        }
-      }
-    }
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shade: 'dark',
-      type: 'horizontal',
-      shadeIntensity: 0.5,
-      gradientToColors: [shiftColor(gaugeColor.value, 30)],
-      inverseColors: false,
-      opacityFrom: 1,
-      opacityTo: 1,
-      stops: [0, 100]
-    }
-  },
-  stroke: {
-    lineCap: 'round'
-  },
-  labels: [props.config?.label || '']
-}))
+      },
+      axisLine: {
+        roundCap: true,
+        lineStyle: {
+          width: 14,
+          color: [[1, 'rgba(255,255,255,0.08)']],
+        },
+      },
+      axisTick: { show: false },
+      splitLine: { show: false },
+      axisLabel: { show: false },
+      pointer: { show: false },
+      title: {
+        show: true,
+        offsetCenter: [0, '70%'],
+        fontSize: 11,
+        color: 'rgba(255,255,255,0.5)',
+        fontWeight: 500,
+      },
+      detail: {
+        offsetCenter: [0, '10%'],
+        fontSize: 22,
+        fontWeight: 700,
+        color: props.styleConfig?.valueColor || '#fff',
+        formatter: () => displayValue.value + (props.config?.unit ? ` ${props.config.unit}` : ''),
+      },
+      data: [{
+        value: percentage.value,
+        name: props.config?.label || '',
+      }],
+    }],
+  }
+}
 
-// Helper to shift color brightness
-function shiftColor(hex: string, percent: number): string {
+function lighten(hex: string, percent: number): string {
   const num = parseInt(hex.replace('#', ''), 16)
   const amt = Math.round(2.55 * percent)
-  const R = Math.min(255, Math.max(0, (num >> 16) + amt))
-  const G = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amt))
-  const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt))
+  const R = Math.min(255, (num >> 16) + amt)
+  const G = Math.min(255, ((num >> 8) & 0xFF) + amt)
+  const B = Math.min(255, (num & 0xFF) + amt)
   return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)
 }
 
@@ -160,6 +130,7 @@ async function fetchData() {
   try {
     const data = await dataService.getStreamValue(props.config.tag)
     currentValue.value = data.Value
+    setOption(buildOption())
   } catch (error) {
     console.error('Error fetching gauge data:', error)
   }
@@ -179,13 +150,9 @@ onUnmounted(() => {
 .gauge-container {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
 }
 
-/* Add subtle glow effect */
 .gauge-container::after {
   content: '';
   position: absolute;
@@ -194,14 +161,7 @@ onUnmounted(() => {
   width: 60%;
   height: 60%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, 
-    rgba(var(--v-theme-primary), 0.1) 0%, 
-    transparent 70%);
+  background: radial-gradient(circle, hsla(var(--primary), 0.08) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 0;
-}
-
-.gauge-container :deep(.apexcharts-radialbar) {
-  filter: drop-shadow(0 0 8px rgba(var(--v-theme-primary), 0.3));
 }
 </style>

@@ -1,80 +1,85 @@
 import type { LayoutItem } from '@/composables/useGridLayout'
 import { COLORS } from '@/styles/colors'
 
-// Large display layout - optimized for TV/wall displays
-// Bigger widgets, fewer items, high visibility
+// Large display layout - optimized for TV/wall displays with the ERCOT Map as hero
 export const largeDisplayLayout: LayoutItem[] = [
-  // Top row: 4 key metrics - large and prominent
-  { 
-    i: 'demand-big', x: 0, y: 0, w: 3, h: 5, type: 'stat', 
-    title: 'System Demand', 
-    config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 1, unit: 'MW' }, 
-    style: { valueColor: COLORS.DEMAND } 
+  // Top row: 4 key metrics
+  {
+    i: 'demand-big', x: 0, y: 0, w: 3, h: 5, type: 'stat',
+    title: 'System Demand',
+    config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 1, unit: 'MW' },
+    style: { valueColor: COLORS.DEMAND }
   },
-  { 
-    i: 'capacity-big', x: 3, y: 0, w: 3, h: 5, type: 'stat', 
-    title: 'Available Capacity', 
-    config: { tag: 'ERCOT.AVAIL_CAPACITY', durationHours: 1, unit: 'MW' }, 
-    style: { valueColor: COLORS.CAPACITY } 
+  {
+    i: 'capacity-big', x: 3, y: 0, w: 3, h: 5, type: 'stat',
+    title: 'Available Capacity',
+    config: { tag: 'ERCOT.AVAIL_CAPACITY', durationHours: 1, unit: 'MW' },
+    style: { valueColor: COLORS.CAPACITY }
   },
-  { 
-    i: 'reserves-big', x: 6, y: 0, w: 3, h: 5, type: 'stat', 
-    title: 'Operating Reserves', 
-    config: { tag: 'ERCOT.OP_RESERVES', durationHours: 1, unit: 'MW' }, 
-    style: { valueColor: COLORS.RESERVES } 
+  {
+    i: 'reserves-big', x: 6, y: 0, w: 3, h: 5, type: 'stat',
+    title: 'Operating Reserves',
+    config: { tag: 'ERCOT.OP_RESERVES', durationHours: 1, unit: 'MW' },
+    style: { valueColor: COLORS.RESERVES }
   },
-  { 
-    i: 'freq-big', x: 9, y: 0, w: 3, h: 5, type: 'stat', 
-    title: 'Grid Frequency', 
-    config: { tag: 'ERCOT.GRID_FREQ', durationHours: 1, unit: 'Hz', decimals: 2 }, 
-    style: { valueColor: COLORS.FREQUENCY } 
+  {
+    i: 'freq-big', x: 9, y: 0, w: 3, h: 5, type: 'stat',
+    title: 'Grid Frequency',
+    config: { tag: 'ERCOT.GRID_FREQ', durationHours: 1, unit: 'Hz', decimals: 2 },
+    style: { valueColor: COLORS.FREQUENCY }
   },
 
-  // Second row: Price, Outages, and Gauges
-  { 
-    i: 'price-big', x: 0, y: 5, w: 3, h: 5, type: 'stat', 
-    title: 'Real-Time Price', 
-    config: { tag: 'ERCOT.RT_PRICE', durationHours: 1, unit: '$/MWh', decimals: 2 }, 
-    style: { valueColor: COLORS.PRICE } 
+  // Second row: ERCOT Map (hero) + Gauges + Mini Dashboard
+  {
+    i: 'ercot-map-lg', x: 0, y: 5, w: 6, h: 10, type: 'map',
+    title: 'ERCOT Grid Map',
+    config: {},
+    style: {}
   },
-  { 
-    i: 'outages-big', x: 3, y: 5, w: 3, h: 5, type: 'stat', 
-    title: 'Total Outages', 
-    config: { tag: 'ERCOT.OUTAGES', durationHours: 1, unit: 'MW' }, 
-    style: { valueColor: COLORS.ALERT } 
+  {
+    i: 'price-big', x: 6, y: 5, w: 3, h: 5, type: 'stat',
+    title: 'Real-Time Price',
+    config: { tag: 'ERCOT.RT_PRICE', durationHours: 1, unit: '$/MWh', decimals: 2 },
+    style: { valueColor: COLORS.PRICE }
   },
-  { 
-    i: 'reserves-gauge', x: 6, y: 5, w: 3, h: 5, type: 'gauge', 
-    title: 'Reserve Margin', 
-    config: { tag: 'ERCOT.OP_RESERVES', min: 0, max: 30000, unit: ' MW' }, 
-    style: { valueColor: COLORS.RESERVES } 
+  {
+    i: 'outages-big', x: 9, y: 5, w: 3, h: 5, type: 'stat',
+    title: 'Total Outages',
+    config: { tag: 'ERCOT.OUTAGES', durationHours: 1, unit: 'MW' },
+    style: { valueColor: COLORS.ALERT }
   },
-  { 
-    i: 'freq-gauge', x: 9, y: 5, w: 3, h: 5, type: 'gauge', 
-    title: 'Grid Frequency', 
-    config: { tag: 'ERCOT.GRID_FREQ', min: 59.9, max: 60.1, unit: ' Hz', decimals: 3 }, 
-    style: { valueColor: COLORS.FREQUENCY } 
+  {
+    i: 'reserves-gauge', x: 6, y: 10, w: 3, h: 5, type: 'gauge',
+    title: 'Reserve Margin',
+    config: { tag: 'ERCOT.OP_RESERVES', min: 0, max: 30000, unit: ' MW' },
+    style: { valueColor: COLORS.RESERVES }
+  },
+  {
+    i: 'freq-gauge', x: 9, y: 10, w: 3, h: 5, type: 'gauge',
+    title: 'Grid Frequency',
+    config: { tag: 'ERCOT.GRID_FREQ', min: 59.9, max: 60.1, unit: ' Hz', decimals: 3 },
+    style: { valueColor: COLORS.FREQUENCY }
   },
 
   // Third row: Full-width demand chart
-  { 
-    i: 'demand-chart', x: 0, y: 10, w: 12, h: 7, type: 'chart', 
-    title: 'System Demand - Last 24 Hours', 
-    config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 24, unit: 'MW' }, 
-    style: { valueColor: COLORS.DEMAND } 
+  {
+    i: 'demand-chart', x: 0, y: 15, w: 12, h: 7, type: 'chart',
+    title: 'System Demand - Last 24 Hours',
+    config: { tag: 'ERCOT.SYSTEM_LOAD', durationHours: 24, unit: 'MW' },
+    style: { valueColor: COLORS.DEMAND }
   },
 
   // Fourth row: Ancillary Services and Generation mix
-  { 
-    i: 'ancillary-services', x: 0, y: 17, w: 4, h: 9, type: 'ancillary', 
-    title: 'Ancillary Services', 
-    config: { durationHours: 2 }, 
-    style: {} 
+  {
+    i: 'ancillary-services', x: 0, y: 22, w: 4, h: 9, type: 'ancillary',
+    title: 'Ancillary Services',
+    config: { durationHours: 2 },
+    style: {}
   },
-  { 
-    i: 'gen-stacked', x: 4, y: 17, w: 8, h: 9, type: 'stacked', 
-    title: 'Generation by Fuel Type - Last 24 Hours', 
-    config: { 
+  {
+    i: 'gen-stacked', x: 4, y: 22, w: 8, h: 9, type: 'stacked',
+    title: 'Generation by Fuel Type - Last 24 Hours',
+    config: {
       durationHours: 24,
       unit: 'MW',
       tags: [
@@ -87,7 +92,7 @@ export const largeDisplayLayout: LayoutItem[] = [
         { tag: 'ERCOT.COAL_GEN', name: 'Coal', color: COLORS.COAL },
         { tag: 'ERCOT.NUCLEAR_GEN', name: 'Nuclear', color: COLORS.NUCLEAR }
       ]
-    }, 
-    style: {} 
+    },
+    style: {}
   }
 ]

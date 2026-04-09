@@ -1,0 +1,239 @@
+/* Tailwind v4 — CSS-first configuration */
+/* Import without preflight to avoid breaking Vuetify styles */
+@import "tailwindcss/theme" prefix(tw);
+@import "tailwindcss/utilities" prefix(tw);
+
+/*
+ * Design system CSS variables
+ * These power both Tailwind (via @theme) and components directly.
+ * HSL values without the hsl() wrapper for Tailwind compatibility.
+ */
+:root {
+  --radius: 0.625rem;
+}
+
+/* Dark theme (default) */
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 96%;
+  --muted: 217 33% 14%;
+  --muted-foreground: 215 20% 55%;
+  --popover: 222 47% 8%;
+  --popover-foreground: 210 40% 96%;
+  --card: 222 41% 10%;
+  --card-foreground: 210 40% 96%;
+  --border: 217 33% 18%;
+  --input: 217 33% 18%;
+  --ring: 188 95% 43%;
+  --primary: 188 95% 43%;
+  --primary-foreground: 222 47% 6%;
+  --secondary: 142 71% 45%;
+  --secondary-foreground: 222 47% 6%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 96%;
+  --accent: 217 33% 14%;
+  --accent-foreground: 210 40% 96%;
+}
+
+/* Light theme */
+:root:not(.dark) {
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --muted: 210 40% 94%;
+  --muted-foreground: 215 16% 47%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --border: 214 32% 88%;
+  --input: 214 32% 88%;
+  --ring: 188 95% 35%;
+  --primary: 188 95% 35%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 142 71% 35%;
+  --secondary-foreground: 0 0% 100%;
+  --destructive: 0 84% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --accent: 210 40% 94%;
+  --accent-foreground: 222 47% 11%;
+}
+
+/* Extend Tailwind theme with ERCOT energy palette */
+@theme {
+  /* Core UI colors */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  /* Energy Palette — Cyan */
+  --color-energy-cyan-50: #ecfeff;
+  --color-energy-cyan-100: #cffafe;
+  --color-energy-cyan-200: #a5f3fc;
+  --color-energy-cyan-300: #67e8f9;
+  --color-energy-cyan-400: #22d3ee;
+  --color-energy-cyan-500: #06b6d4;
+  --color-energy-cyan-600: #0891b2;
+  --color-energy-cyan-700: #0e7490;
+  --color-energy-cyan-800: #155e75;
+  --color-energy-cyan-900: #164e63;
+
+  /* Energy Palette — Green */
+  --color-energy-green-50: #f0fdf4;
+  --color-energy-green-100: #dcfce7;
+  --color-energy-green-200: #bbf7d0;
+  --color-energy-green-300: #86efac;
+  --color-energy-green-400: #4ade80;
+  --color-energy-green-500: #22c55e;
+  --color-energy-green-600: #16a34a;
+  --color-energy-green-700: #15803d;
+  --color-energy-green-800: #166534;
+  --color-energy-green-900: #14532d;
+
+  /* Energy Palette — Amber */
+  --color-energy-amber-50: #fffbeb;
+  --color-energy-amber-100: #fef3c7;
+  --color-energy-amber-200: #fde68a;
+  --color-energy-amber-300: #fcd34d;
+  --color-energy-amber-400: #fbbf24;
+  --color-energy-amber-500: #f59e0b;
+  --color-energy-amber-600: #d97706;
+  --color-energy-amber-700: #b45309;
+  --color-energy-amber-800: #92400e;
+  --color-energy-amber-900: #78350f;
+
+  /* Energy Palette — Red */
+  --color-energy-red-50: #fef2f2;
+  --color-energy-red-100: #fee2e2;
+  --color-energy-red-200: #fecaca;
+  --color-energy-red-300: #fca5a5;
+  --color-energy-red-400: #f87171;
+  --color-energy-red-500: #ef4444;
+  --color-energy-red-600: #dc2626;
+  --color-energy-red-700: #b91c1c;
+  --color-energy-red-800: #991b1b;
+  --color-energy-red-900: #7f1d1d;
+
+  /* Energy Palette — Purple */
+  --color-energy-purple-50: #f5f3ff;
+  --color-energy-purple-100: #ede9fe;
+  --color-energy-purple-200: #ddd6fe;
+  --color-energy-purple-300: #c4b5fd;
+  --color-energy-purple-400: #a78bfa;
+  --color-energy-purple-500: #8b5cf6;
+  --color-energy-purple-600: #7c3aed;
+  --color-energy-purple-700: #6d28d9;
+  --color-energy-purple-800: #5b21b6;
+  --color-energy-purple-900: #4c1d95;
+
+  /* Typography */
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Border radius */
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Custom keyframes */
+  --animate-aurora: aurora 15s ease infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
+  --animate-slide-in-bottom: slide-in-bottom 0.3s ease-out;
+
+  @keyframes aurora {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-in-right {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes slide-in-bottom {
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(0); }
+  }
+}
+
+/* Glass morphism utilities — using plain CSS since @apply doesn't work well during migration */
+.glass-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid hsla(var(--border), 0.5);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  background: hsla(var(--card), 0.6);
+}
+
+.glass-card-solid {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid hsla(var(--border), 0.5);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  background: hsl(var(--card));
+}
+
+.glass-surface {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid hsla(var(--border), 0.3);
+  background: hsla(var(--background), 0.8);
+}
+
+/* Aurora mesh gradient background effect */
+.aurora-bg {
+  background: linear-gradient(
+    -45deg,
+    hsla(188, 95%, 43%, 0.08),
+    hsla(262, 83%, 58%, 0.06),
+    hsla(142, 71%, 45%, 0.06),
+    hsla(188, 95%, 43%, 0.08)
+  );
+  background-size: 400% 400%;
+  animation: aurora 15s ease infinite;
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}

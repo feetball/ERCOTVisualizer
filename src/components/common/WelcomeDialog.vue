@@ -1,100 +1,62 @@
 <template>
-  <v-dialog v-model="showDialog" max-width="600" persistent>
-    <v-card class="welcome-card">
-      <v-card-title class="welcome-title d-flex align-center">
-        <v-icon class="mr-2" color="primary">mdi-lightning-bolt</v-icon>
-        Welcome to ERCOT Grid Monitor
-      </v-card-title>
-      
-      <v-card-text class="pa-4">
-        <p class="text-body-1 mb-4">
+  <Dialog :open="showDialog" @update:open="showDialog = $event">
+    <DialogContent class="tw-max-w-lg">
+      <DialogHeader>
+        <DialogTitle class="tw-flex tw-items-center tw-gap-2">
+          <Zap :size="20" class="tw-text-primary" />
+          Welcome to ERCOT Grid Monitor
+        </DialogTitle>
+        <DialogDescription>
           Monitor real-time ERCOT grid operations with customizable dashboards.
-        </p>
-        
-        <v-list density="compact" class="mb-4 bg-transparent">
-          <v-list-item prepend-icon="mdi-view-dashboard">
-            <v-list-item-title><strong>Pre-built Views</strong></v-list-item-title>
-            <v-list-item-subtitle>Grid Summary and Large Display views come ready to use</v-list-item-subtitle>
-          </v-list-item>
-          
-          <v-list-item prepend-icon="mdi-pencil-ruler">
-            <v-list-item-title><strong>Editable Layouts</strong></v-list-item-title>
-            <v-list-item-subtitle>Click "Edit" to drag, resize, and customize your views</v-list-item-subtitle>
-          </v-list-item>
-          
-          <v-list-item prepend-icon="mdi-widgets">
-            <v-list-item-title><strong>Widget Library</strong></v-list-item-title>
-            <v-list-item-subtitle>Charts, stats, gauges, and more to visualize grid data</v-list-item-subtitle>
-          </v-list-item>
-          
-          <v-list-item prepend-icon="mdi-plus-circle">
-            <v-list-item-title><strong>Custom Views</strong></v-list-item-title>
-            <v-list-item-subtitle>Create your own dashboards from the navigation menu</v-list-item-subtitle>
-          </v-list-item>
-          
-          <v-list-item prepend-icon="mdi-alert-circle">
-            <v-list-item-title><strong>Alert Indicators</strong></v-list-item-title>
-            <v-list-item-subtitle>Color-coded status for frequency, reserves, load, and price</v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
-        
-        <v-alert type="info" variant="tonal" density="compact" class="mb-4">
-          <template #prepend>
-            <v-icon>mdi-information</v-icon>
-          </template>
-          Pre-defined views (Grid Summary, Large Display) cannot be permanently modified. 
-          Create a custom view to build your own layout.
-        </v-alert>
-        
-        <div class="d-flex align-center justify-space-between">
-          <v-checkbox 
-            v-model="dontShowAgain" 
-            label="Don't show this again" 
-            density="compact"
-            hide-details
-            class="flex-shrink-0"
-          ></v-checkbox>
-          
-          <v-btn 
-            variant="text" 
-            size="small" 
-            color="primary"
-            @click="goToHelp"
-          >
-            <v-icon start>mdi-help-circle</v-icon>
-            More Help
-          </v-btn>
-        </div>
-      </v-card-text>
-      
-      <v-card-actions class="pa-4 pt-0">
-        <v-spacer></v-spacer>
-        <v-btn 
-          color="primary" 
-          variant="flat" 
-          size="large"
-          @click="dismiss"
+        </DialogDescription>
+      </DialogHeader>
+
+      <div class="tw-flex tw-flex-col tw-gap-3 tw-py-2">
+        <FeatureItem :icon="LayoutDashboard" title="Pre-built Views" description="Grid Summary and Large Display views come ready to use" />
+        <FeatureItem :icon="PencilRuler" title="Editable Layouts" description="Click &quot;Edit&quot; to drag, resize, and customize your views" />
+        <FeatureItem :icon="LayoutGrid" title="Widget Library" description="Charts, stats, gauges, and more to visualize grid data" />
+        <FeatureItem :icon="PlusCircle" title="Custom Views" description="Create your own dashboards from the navigation menu" />
+        <FeatureItem :icon="Bell" title="Alert Indicators" description="Color-coded status for frequency, reserves, load, and price" />
+      </div>
+
+      <div class="tw-rounded-lg tw-bg-primary/10 tw-border tw-border-primary/20 tw-px-3 tw-py-2 tw-text-sm tw-text-foreground/80">
+        <Info :size="14" class="tw-inline tw-mr-1 tw-text-primary" />
+        Pre-defined views cannot be permanently modified. Create a custom view to build your own layout.
+      </div>
+
+      <div class="tw-flex tw-items-center tw-justify-between tw-pt-2">
+        <Checkbox v-model="dontShowAgain">Don't show this again</Checkbox>
+        <button
+          class="tw-text-sm tw-text-primary hover:tw-underline tw-flex tw-items-center tw-gap-1"
+          @click="goToHelp"
         >
-          Get Started
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+          <HelpCircle :size="14" />
+          More Help
+        </button>
+      </div>
+
+      <DialogFooter>
+        <Button size="lg" @click="dismiss">Get Started</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, type Component } from 'vue'
 import { useRouter } from 'vue-router'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Zap, LayoutDashboard, PencilRuler, LayoutGrid, PlusCircle, Bell, Info, HelpCircle } from 'lucide-vue-next'
 
 const STORAGE_KEY = 'ercot-welcome-dismissed'
-
 const router = useRouter()
 const showDialog = ref(false)
 const dontShowAgain = ref(false)
 
 onMounted(() => {
-  const dismissed = localStorage.getItem(STORAGE_KEY)
-  if (!dismissed) {
+  if (!localStorage.getItem(STORAGE_KEY)) {
     showDialog.value = true
   }
 })
@@ -110,36 +72,18 @@ function goToHelp() {
   dismiss()
   router.push('/help')
 }
+
+// Inline sub-component for the feature list items
+const FeatureItem = {
+  props: { icon: Object, title: String, description: String },
+  template: `
+    <div class="tw-flex tw-items-start tw-gap-3">
+      <component :is="icon" :size="16" class="tw-mt-0.5 tw-shrink-0 tw-text-primary" />
+      <div>
+        <div class="tw-text-sm tw-font-medium tw-text-foreground">{{ title }}</div>
+        <div class="tw-text-xs tw-text-muted-foreground">{{ description }}</div>
+      </div>
+    </div>
+  `,
+} as Component
 </script>
-
-<style scoped>
-.welcome-card {
-  background: linear-gradient(145deg, 
-    rgba(var(--v-theme-surface), 0.98) 0%, 
-    rgba(var(--v-theme-surface-bright), 0.95) 100%) !important;
-  border: 1px solid rgba(var(--v-theme-primary), 0.3);
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.4),
-    0 0 60px rgba(var(--v-theme-primary), 0.15) !important;
-}
-
-.welcome-title {
-  background: linear-gradient(90deg, 
-    rgba(var(--v-theme-primary), 0.2) 0%, 
-    rgba(var(--v-theme-secondary), 0.1) 100%);
-  border-bottom: 1px solid rgba(var(--v-theme-primary), 0.2);
-  font-weight: 600;
-}
-
-.welcome-card :deep(.v-list-item) {
-  padding: 8px 0;
-}
-
-.welcome-card :deep(.v-list-item__prepend) {
-  margin-right: 12px;
-}
-
-.welcome-card :deep(.v-list-item .v-icon) {
-  color: rgb(var(--v-theme-primary));
-}
-</style>

@@ -77,7 +77,7 @@ export interface WidgetStyle {
 }
 
 /** Widget types supported by the application */
-export type WidgetType = 'chart' | 'value' | 'stat' | 'gauge' | 'table' | 'stacked' | 'ancillary' | 'alert'
+export type WidgetType = 'chart' | 'value' | 'stat' | 'gauge' | 'table' | 'stacked' | 'ancillary' | 'alert' | 'map' | 'trend' | 'heatcalendar' | 'minidash'
 
 /** Layout item for grid-layout-plus */
 export interface LayoutItem {

@@ -1,260 +1,168 @@
 <template>
-  <v-dialog v-model="dialog" max-width="700" persistent>
-    <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        <span>{{ isEditing ? 'Edit Widget' : 'Add Widget' }}</span>
-        <v-btn icon="mdi-close" variant="text" @click="close"></v-btn>
-      </v-card-title>
-      <v-divider></v-divider>
+  <Dialog :open="dialog" @update:open="v => { dialog = v; emit('update:modelValue', v) }">
+    <DialogContent class="tw-max-w-2xl tw-max-h-[85vh] tw-overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>{{ isEditing ? 'Edit Widget' : 'Add Widget' }}</DialogTitle>
+      </DialogHeader>
 
-      <v-card-text>
-        <v-tabs v-model="tab" bg-color="transparent">
-          <v-tab value="general">General</v-tab>
-          <v-tab value="data">Data Source</v-tab>
-          <v-tab value="calc">Calculations</v-tab>
-          <v-tab value="style">Styling</v-tab>
-        </v-tabs>
+      <!-- Tabs -->
+      <div class="tw-flex tw-gap-1 tw-border-b tw-border-border/50 tw-mb-4">
+        <button v-for="t in tabs" :key="t.value" class="tab-btn" :class="{ active: tab === t.value }" @click="tab = t.value">
+          {{ t.label }}
+        </button>
+      </div>
 
-        <v-tabs-window v-model="tab" class="mt-4">
-          <!-- General Tab -->
-          <v-tabs-window-item value="general">
-            <v-form ref="formRef" v-model="formValid">
-              <v-select
-                v-model="form.type"
-                :items="widgetTypes"
-                item-title="label"
-                item-value="value"
-                label="Widget Type"
-                density="compact"
-                :disabled="isEditing"
-                :rules="[rules.required]"
-              ></v-select>
-              <v-text-field
-                v-model="form.title"
-                label="Title"
-                density="compact"
-                :rules="[rules.required, rules.minLength(2)]"
-                counter
-                maxlength="50"
-              ></v-text-field>
-            </v-form>
-          </v-tabs-window-item>
+      <!-- General Tab -->
+      <div v-show="tab === 'general'" class="tw-space-y-3">
+        <div>
+          <label class="field-label">Widget Type</label>
+          <select v-model="form.type" :disabled="isEditing" class="field-select">
+            <option v-for="wt in widgetTypes" :key="wt.value" :value="wt.value">{{ wt.label }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Title</label>
+          <Input v-model="form.title" placeholder="Widget title" />
+        </div>
+      </div>
 
-          <!-- Data Source Tab -->
-          <v-tabs-window-item value="data">
-            <v-text-field
-              v-model="tagSearch"
-              label="Search PI Tags"
-              prepend-inner-icon="mdi-magnify"
-              density="compact"
-              clearable
-              @input="searchTags"
-            ></v-text-field>
-            <v-list density="compact" max-height="200" class="overflow-y-auto border rounded mb-4">
-              <v-list-item
-                v-for="tag in filteredTags"
-                :key="tag.webId"
-                :title="tag.name"
-                :subtitle="`${tag.webId} (${tag.unit})`"
-                @click="selectTag(tag)"
-                :active="form.config.tag === tag.webId"
-              >
-                <template #append>
-                  <v-chip size="x-small" color="primary" variant="outlined">{{ tag.unit }}</v-chip>
-                </template>
-              </v-list-item>
-              <v-list-item v-if="filteredTags.length === 0" title="No tags found"></v-list-item>
-            </v-list>
+      <!-- Data Source Tab -->
+      <div v-show="tab === 'data'" class="tw-space-y-3">
+        <div>
+          <label class="field-label">Search Tags</label>
+          <Input v-model="tagSearch" placeholder="Search ERCOT tags..." @input="searchTags" />
+        </div>
+        <div class="tw-max-h-48 tw-overflow-y-auto tw-border tw-border-border/50 tw-rounded-lg">
+          <button
+            v-for="tag in filteredTags"
+            :key="tag.webId"
+            class="tw-flex tw-items-center tw-justify-between tw-w-full tw-px-3 tw-py-2 tw-text-left tw-text-sm hover:tw-bg-accent/50 tw-transition-colors"
+            :class="{ 'tw-bg-primary/10': form.config.tag === tag.webId }"
+            @click="selectTag(tag)"
+          >
+            <div>
+              <div class="tw-font-medium tw-text-foreground">{{ tag.name }}</div>
+              <div class="tw-text-xs tw-text-muted-foreground">{{ tag.webId }}</div>
+            </div>
+            <span class="tw-text-xs tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-primary/30 tw-text-primary">{{ tag.unit }}</span>
+          </button>
+          <div v-if="filteredTags.length === 0" class="tw-px-3 tw-py-4 tw-text-sm tw-text-muted-foreground tw-text-center">No tags found</div>
+        </div>
 
-            <v-text-field
-              v-model="form.config.tag"
-              label="Selected Tag / WebID"
-              density="compact"
-              readonly
-            ></v-text-field>
+        <div>
+          <label class="field-label">Selected Tag</label>
+          <Input :model-value="form.config.tag" readonly />
+        </div>
+        <div>
+          <label class="field-label">Duration (hours)</label>
+          <input type="number" v-model.number="form.config.durationHours" min="1" max="168" class="field-input" />
+        </div>
 
-            <v-text-field
-              v-model.number="form.config.durationHours"
-              label="Duration (hours)"
-              type="number"
-              density="compact"
-              :rules="[rules.positiveNumber]"
-              min="1"
-              max="168"
-            ></v-text-field>
+        <template v-if="form.type === 'gauge' || form.type === 'stat' || form.type === 'value' || form.type === 'trend'">
+          <div class="tw-pt-2 tw-border-t tw-border-border/30">
+            <span class="tw-text-xs tw-font-medium tw-text-muted-foreground tw-uppercase">Display Options</span>
+          </div>
+          <div>
+            <label class="field-label">Display Label</label>
+            <Input v-model="form.config.label" placeholder="Short label" />
+          </div>
+          <div class="tw-grid tw-grid-cols-2 tw-gap-3">
+            <div>
+              <label class="field-label">Unit</label>
+              <Input v-model="form.config.unit" placeholder="Hz, MW, $" />
+            </div>
+            <div>
+              <label class="field-label">Decimals</label>
+              <input type="number" v-model.number="form.config.decimals" min="0" max="6" class="field-input" />
+            </div>
+          </div>
+        </template>
 
-            <!-- Gauge/Stat specific options -->
-            <template v-if="form.type === 'gauge' || form.type === 'stat' || form.type === 'value'">
-              <v-divider class="my-3"></v-divider>
-              <div class="text-subtitle-2 mb-2">Display Options</div>
-              
-              <v-text-field
-                v-model="form.config.label"
-                label="Display Label"
-                density="compact"
-                hint="Short label shown on the widget"
-              ></v-text-field>
+        <template v-if="form.type === 'gauge'">
+          <div class="tw-grid tw-grid-cols-2 tw-gap-3">
+            <div>
+              <label class="field-label">Min Value</label>
+              <input type="number" v-model.number="form.config.min" class="field-input" />
+            </div>
+            <div>
+              <label class="field-label">Max Value</label>
+              <input type="number" v-model.number="form.config.max" class="field-input" />
+            </div>
+          </div>
+        </template>
+      </div>
 
-              <v-text-field
-                v-model="form.config.unit"
-                label="Unit (e.g., Hz, MW, %)"
-                density="compact"
-              ></v-text-field>
+      <!-- Calculations Tab -->
+      <div v-show="tab === 'calc'" class="tw-space-y-3">
+        <div class="tw-rounded-lg tw-bg-primary/10 tw-border tw-border-primary/20 tw-p-3 tw-text-sm tw-text-foreground/80">
+          <strong>Safe Calculations:</strong> Use simple expressions:
+          <ul class="tw-mt-1 tw-ml-4 tw-list-disc tw-text-xs tw-space-y-0.5">
+            <li><code>value * 2</code> — Multiply</li>
+            <li><code>value / 100</code> — Divide</li>
+            <li><code>value + 10</code> — Add</li>
+            <li><code>value - 5</code> — Subtract</li>
+          </ul>
+        </div>
+        <div>
+          <label class="field-label">Calculation Expression (optional)</label>
+          <Input v-model="form.config.calculation" placeholder="value * 1.0" />
+        </div>
+      </div>
 
-              <v-text-field
-                v-model.number="form.config.decimals"
-                label="Decimal Places"
-                type="number"
-                density="compact"
-                :rules="[rules.decimals]"
-                min="0"
-                max="6"
-              ></v-text-field>
-            </template>
+      <!-- Styling Tab -->
+      <div v-show="tab === 'style'" class="tw-space-y-3">
+        <div class="tw-flex tw-items-center tw-gap-2">
+          <div class="tw-flex-1">
+            <label class="field-label">Title Color</label>
+            <Input v-model="form.style.titleColor" placeholder="#FFFFFF" />
+          </div>
+          <input type="color" v-model="form.style.titleColor" class="tw-w-8 tw-h-8 tw-rounded tw-border-none tw-cursor-pointer tw-mt-5" />
+        </div>
+        <div>
+          <label class="field-label">Title Font Size</label>
+          <select v-model="form.style.titleSize" class="field-select">
+            <option v-for="s in fontSizes" :key="s" :value="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="tw-flex tw-items-center tw-gap-2">
+          <div class="tw-flex-1">
+            <label class="field-label">Background Color</label>
+            <Input v-model="form.style.backgroundColor" placeholder="#1E1E1E" />
+          </div>
+          <input type="color" v-model="form.style.backgroundColor" class="tw-w-8 tw-h-8 tw-rounded tw-border-none tw-cursor-pointer tw-mt-5" />
+        </div>
+        <div class="tw-flex tw-items-center tw-gap-2">
+          <div class="tw-flex-1">
+            <label class="field-label">Value/Line Color</label>
+            <Input v-model="form.style.valueColor" placeholder="#4CAF50" />
+          </div>
+          <input type="color" v-model="form.style.valueColor" class="tw-w-8 tw-h-8 tw-rounded tw-border-none tw-cursor-pointer tw-mt-5" />
+        </div>
+      </div>
 
-            <!-- Gauge specific min/max -->
-            <template v-if="form.type === 'gauge'">
-              <v-row dense>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model.number="form.config.min"
-                    label="Min Value"
-                    type="number"
-                    density="compact"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model.number="form.config.max"
-                    label="Max Value"
-                    type="number"
-                    density="compact"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-            </template>
-          </v-tabs-window-item>
-
-          <!-- Calculations Tab -->
-          <v-tabs-window-item value="calc">
-            <v-alert type="info" variant="tonal" density="compact" class="mb-4">
-              <div class="text-body-2">
-                <strong>Safe Calculations:</strong> Use simple expressions like:
-                <ul class="mt-1 mb-0">
-                  <li><code>value * 2</code> - Multiply by 2</li>
-                  <li><code>value / 100</code> - Divide by 100</li>
-                  <li><code>value + 10</code> - Add 10</li>
-                  <li><code>value - 5</code> - Subtract 5</li>
-                </ul>
-              </div>
-            </v-alert>
-            <v-text-field
-              v-model="form.config.calculation"
-              label="Calculation Expression (optional)"
-              placeholder="value * 1.0"
-              density="compact"
-              hint="Simple math: value * N, value / N, value + N, value - N"
-              persistent-hint
-            ></v-text-field>
-          </v-tabs-window-item>
-
-          <!-- Styling Tab -->
-          <v-tabs-window-item value="style">
-            <v-text-field
-              v-model="form.style.titleColor"
-              label="Title Color"
-              density="compact"
-              placeholder="#FFFFFF"
-            >
-              <template #append>
-                <input type="color" v-model="form.style.titleColor" style="width: 30px; height: 30px; border: none; cursor: pointer;" />
-              </template>
-            </v-text-field>
-
-            <v-select
-              v-model="form.style.titleSize"
-              :items="fontSizes"
-              label="Title Font Size"
-              density="compact"
-            ></v-select>
-
-            <v-text-field
-              v-model="form.style.backgroundColor"
-              label="Background Color"
-              density="compact"
-              placeholder="#1E1E1E"
-            >
-              <template #append>
-                <input type="color" v-model="form.style.backgroundColor" style="width: 30px; height: 30px; border: none; cursor: pointer;" />
-              </template>
-            </v-text-field>
-
-            <v-text-field
-              v-model="form.style.valueColor"
-              label="Value/Line Color"
-              density="compact"
-              placeholder="#4CAF50"
-            >
-              <template #append>
-                <input type="color" v-model="form.style.valueColor" style="width: 30px; height: 30px; border: none; cursor: pointer;" />
-              </template>
-            </v-text-field>
-          </v-tabs-window-item>
-        </v-tabs-window>
-      </v-card-text>
-
-      <v-divider></v-divider>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" @click="close">Cancel</v-btn>
-        <v-btn color="primary" variant="flat" @click="save" :disabled="!formValid || !form.config.tag">{{ isEditing ? 'Update' : 'Add' }}</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      <DialogFooter class="tw-mt-4">
+        <Button variant="ghost" @click="close">Cancel</Button>
+        <Button @click="save" :disabled="!form.title?.trim() || !form.config.tag">{{ isEditing ? 'Update' : 'Add' }}</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ERCOT_TAGS } from '@/services/dataService'
 import type { WidgetType, WidgetStyle } from '@/types/widget'
 
-interface ErcotTag {
-  webId: string
-  name: string
-  path: string
-  description: string
-  unit: string
-  nominal: number
-  min: number
-  max: number
-}
-
-interface WidgetFormConfig {
-  tag: string
-  durationHours: number
-  calculation: string
-  label: string
-  min: number
-  max: number
-  unit: string
-  decimals: number
-}
-
-interface WidgetForm {
-  type: WidgetType
-  title: string
-  config: WidgetFormConfig
-  style: WidgetStyle
-}
+interface ErcotTag { webId: string; name: string; path: string; description: string; unit: string; nominal: number; min: number; max: number }
+interface WidgetFormConfig { tag: string; durationHours: number; calculation: string; label: string; min: number; max: number; unit: string; decimals: number }
+interface WidgetForm { type: WidgetType; title: string; config: WidgetFormConfig; style: WidgetStyle }
 
 const props = defineProps<{
   modelValue: boolean
-  editWidget?: {
-    type?: WidgetType
-    title?: string
-    config?: Partial<WidgetFormConfig>
-    style?: Partial<WidgetStyle>
-  } | null
+  editWidget?: { type?: WidgetType; title?: string; config?: Partial<WidgetFormConfig>; style?: Partial<WidgetStyle> } | null
 }>()
 
 const emit = defineEmits<{
@@ -266,16 +174,13 @@ const dialog = ref(false)
 const tab = ref('general')
 const isEditing = ref(false)
 const tagSearch = ref('')
-const formRef = ref()
-const formValid = ref(false)
 
-// Validation rules
-const rules = {
-  required: (v: string) => !!v || 'This field is required',
-  minLength: (min: number) => (v: string) => (v && v.length >= min) || `Must be at least ${min} characters`,
-  positiveNumber: (v: number) => (v === undefined || v === null || v > 0) || 'Must be a positive number',
-  decimals: (v: number) => (v === undefined || v === null || (v >= 0 && v <= 6)) || 'Must be between 0 and 6'
-}
+const tabs = [
+  { label: 'General', value: 'general' },
+  { label: 'Data Source', value: 'data' },
+  { label: 'Calculations', value: 'calc' },
+  { label: 'Styling', value: 'style' },
+]
 
 const widgetTypes = [
   { label: 'Line Chart', value: 'chart' },
@@ -283,44 +188,26 @@ const widgetTypes = [
   { label: 'Single Value', value: 'value' },
   { label: 'Stat (Grafana-style)', value: 'stat' },
   { label: 'Gauge', value: 'gauge' },
-  { label: 'Data Table', value: 'table' }
+  { label: 'Data Table', value: 'table' },
+  { label: 'ERCOT Map', value: 'map' },
+  { label: 'Trend', value: 'trend' },
+  { label: 'Heat Calendar', value: 'heatcalendar' },
+  { label: 'Mini Dashboard', value: 'minidash' },
 ]
 
 const fontSizes = ['0.75rem', '0.875rem', '1rem', '1.125rem', '1.25rem', '1.5rem', '2rem']
 
-// ERCOT tags for the tag browser
-const ercotTags: ErcotTag[] = Object.values(ERCOT_TAGS).map((tag) => ({
-  webId: tag.webId,
-  name: tag.name,
-  path: `\\\\ERCOT\\${tag.webId.replace('ERCOT.', '')}`,
-  description: tag.description,
-  unit: tag.unit,
-  nominal: tag.nominal,
-  min: tag.min,
-  max: tag.max
+const ercotTags: ErcotTag[] = Object.values(ERCOT_TAGS).map(tag => ({
+  webId: tag.webId, name: tag.name, path: `\\\\ERCOT\\${tag.webId.replace('ERCOT.', '')}`,
+  description: tag.description, unit: tag.unit, nominal: tag.nominal, min: tag.min, max: tag.max,
 }))
 
 const filteredTags = ref<ErcotTag[]>(ercotTags)
 
 const defaultForm = (): WidgetForm => ({
-  type: 'chart',
-  title: '',
-  config: {
-    tag: '',
-    durationHours: 4,
-    calculation: '',
-    label: '',
-    min: 0,
-    max: 100,
-    unit: '',
-    decimals: 2
-  },
-  style: {
-    titleColor: '',
-    titleSize: '1rem',
-    backgroundColor: '',
-    valueColor: ''
-  }
+  type: 'chart', title: '',
+  config: { tag: '', durationHours: 4, calculation: '', label: '', min: 0, max: 100, unit: '', decimals: 2 },
+  style: { titleColor: '', titleSize: '1rem', backgroundColor: '', valueColor: '' },
 })
 
 const form = reactive<WidgetForm>(defaultForm())
@@ -332,56 +219,56 @@ watch(() => props.modelValue, (val) => {
     if (props.editWidget) {
       isEditing.value = true
       Object.assign(form, {
-        type: props.editWidget.type || 'chart',
-        title: props.editWidget.title || '',
+        type: props.editWidget.type || 'chart', title: props.editWidget.title || '',
         config: { ...defaultForm().config, ...props.editWidget.config },
-        style: { ...defaultForm().style, ...props.editWidget.style }
+        style: { ...defaultForm().style, ...props.editWidget.style },
       })
     } else {
       isEditing.value = false
       Object.assign(form, defaultForm())
     }
-    // Validate form after populating
-    setTimeout(() => formRef.value?.validate(), 100)
   }
 })
 
-watch(dialog, (val) => {
-  emit('update:modelValue', val)
-})
+watch(dialog, val => emit('update:modelValue', val))
 
 function searchTags() {
   const q = tagSearch.value?.toLowerCase() || ''
-  filteredTags.value = ercotTags.filter(t => 
-    t.name.toLowerCase().includes(q) || 
-    t.path.toLowerCase().includes(q) ||
-    t.description.toLowerCase().includes(q)
-  )
+  filteredTags.value = ercotTags.filter(t => t.name.toLowerCase().includes(q) || t.path.toLowerCase().includes(q) || t.description.toLowerCase().includes(q))
 }
 
 function selectTag(tag: ErcotTag) {
   form.config.tag = tag.webId
-  if (!form.title) {
-    form.title = tag.name
-  }
-  // Auto-populate unit and min/max for gauges
-  if (tag.unit) {
-    form.config.unit = tag.unit
-  }
-  if (tag.min !== undefined) {
-    form.config.min = tag.min
-  }
-  if (tag.max !== undefined) {
-    form.config.max = tag.max
-  }
+  if (!form.title) form.title = tag.name
+  if (tag.unit) form.config.unit = tag.unit
+  if (tag.min !== undefined) form.config.min = tag.min
+  if (tag.max !== undefined) form.config.max = tag.max
 }
 
-function close() {
-  dialog.value = false
-}
-
-function save() {
-  emit('save', { ...form, isEditing: isEditing.value })
-  dialog.value = false
-}
+function close() { dialog.value = false }
+function save() { emit('save', { ...form, isEditing: isEditing.value }); dialog.value = false }
 </script>
+
+<style scoped>
+.tab-btn {
+  padding: 6px 12px; font-size: 12px; font-weight: 500;
+  color: hsl(var(--muted-foreground)); border-bottom: 2px solid transparent;
+  background: transparent; cursor: pointer; transition: all 0.15s;
+}
+.tab-btn:hover { color: hsl(var(--foreground)); }
+.tab-btn.active { color: hsl(var(--primary)); border-bottom-color: hsl(var(--primary)); }
+.field-label { display: block; font-size: 12px; font-weight: 500; color: hsl(var(--muted-foreground)); margin-bottom: 4px; }
+.field-input {
+  width: 100%; height: 36px; padding: 0 10px; border-radius: 6px; font-size: 13px;
+  border: 1px solid hsl(var(--input)); background: transparent; color: hsl(var(--foreground));
+  outline: none; transition: border-color 0.15s;
+}
+.field-input:focus { border-color: hsl(var(--ring)); }
+.field-select {
+  width: 100%; height: 36px; padding: 0 10px; border-radius: 6px; font-size: 13px;
+  border: 1px solid hsl(var(--input)); background: hsl(var(--card)); color: hsl(var(--foreground));
+  outline: none; cursor: pointer;
+}
+.field-select:focus { border-color: hsl(var(--ring)); }
+.field-select option { background: hsl(var(--card)); color: hsl(var(--foreground)); }
+</style>

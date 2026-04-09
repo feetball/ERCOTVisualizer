@@ -1,125 +1,29 @@
 <template>
-  <v-app>
-    <v-navigation-drawer v-model="drawer" app temporary width="260">
-      <v-list>
-        <v-list-item>
-          <v-list-item-title class="text-h6">ERCOT Grid Monitor</v-list-item-title>
-        </v-list-item>
+  <div class="app-root">
+    <!-- Header -->
+    <AppHeader @toggle-nav="drawerOpen = !drawerOpen" />
 
-        <v-divider></v-divider>
+    <!-- Side Navigation -->
+    <SideNav
+      v-model:open="drawerOpen"
+      :private-views="privateViews"
+      :public-views="publicViews"
+      @copy-view="copyView"
+      @edit-view="confirmEditView"
+      @delete-view="confirmDeleteView"
+      @new-view="newViewOpen = true"
+    />
 
-        <v-list-subheader>Pre-defined Views</v-list-subheader>
-        <v-list-item @click="navigate('/')" link prepend-icon="mdi-chart-line">
-          <v-list-item-title>Grid Summary</v-list-item-title>
-          <template #append>
-            <v-btn
-              icon="mdi-content-copy"
-              variant="text"
-              size="x-small"
-              title="Copy to My Views"
-              @click.stop="copyView('grid-summary', 'Grid Summary')"
-            ></v-btn>
-          </template>
-        </v-list-item>
+    <!-- Main Content -->
+    <main class="app-main aurora-bg noise-overlay">
+      <router-view />
+    </main>
 
-        <v-list-item @click="navigate('/large-display')" link prepend-icon="mdi-monitor">
-          <v-list-item-title>Large Display</v-list-item-title>
-          <template #append>
-            <v-btn
-              icon="mdi-content-copy"
-              variant="text"
-              size="x-small"
-              title="Copy to My Views"
-              @click.stop="copyView('large-display', 'Large Display')"
-            ></v-btn>
-          </template>
-        </v-list-item>
-
-        <v-divider class="my-2"></v-divider>
-
-        <v-list-subheader>My Views</v-list-subheader>
-        <v-list-item
-          v-for="view in privateViews"
-          :key="view.id"
-          @click="navigate(`/view/${view.id}`)"
-          link
-          prepend-icon="mdi-view-grid"
-        >
-          <v-list-item-title>{{ view.name }}</v-list-item-title>
-          <template #append>
-            <v-btn
-              icon="mdi-pencil"
-              variant="text"
-              size="x-small"
-              title="Rename view"
-              @click.stop="confirmEditView(view.id, view.name)"
-            ></v-btn>
-            <v-btn
-              icon="mdi-delete"
-              variant="text"
-              size="x-small"
-              title="Delete view"
-              @click.stop="confirmDeleteView(view.id)"
-            ></v-btn>
-          </template>
-        </v-list-item>
-
-        <v-list-subheader>Public Views</v-list-subheader>
-        <v-list-item
-          v-for="view in publicViews"
-          :key="view.id"
-          @click="navigate(`/view/${view.id}`)"
-          link
-          prepend-icon="mdi-view-grid-outline"
-        >
-          <v-list-item-title>{{ view.name }}</v-list-item-title>
-          <template #append>
-            <v-btn
-              icon="mdi-pencil"
-              variant="text"
-              size="x-small"
-              title="Rename view"
-              @click.stop="confirmEditView(view.id, view.name)"
-            ></v-btn>
-            <v-btn
-              icon="mdi-delete"
-              variant="text"
-              size="x-small"
-              title="Delete view"
-              @click.stop="confirmDeleteView(view.id)"
-            ></v-btn>
-          </template>
-        </v-list-item>
-
-        <v-list-item @click="showNewViewDialog = true" link prepend-icon="mdi-plus">
-          <v-list-item-title>New View</v-list-item-title>
-        </v-list-item>
-
-        <v-divider class="my-2"></v-divider>
-
-        <v-list-item @click="navigate('/help')" link prepend-icon="mdi-help-circle">
-          <v-list-item-title>Help</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-app-bar app density="compact" :height="45" class="app-bar-dark">
-      <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <v-app-bar-title class="text-body-1">ERCOT Grid Monitor</v-app-bar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon size="small" @click="toggleTheme">
-        <v-icon size="18">mdi-theme-light-dark</v-icon>
-      </v-btn>
-    </v-app-bar>
-
-    <v-main>
-      <router-view></router-view>
-    </v-main>
+    <!-- Mobile Bottom Nav -->
+    <MobileNav />
 
     <!-- Version Display -->
-    <div class="version-display">
-      v{{ version }}
-    </div>
+    <div class="version-display">v{{ version }}</div>
 
     <!-- Welcome Dialog -->
     <WelcomeDialog />
@@ -127,147 +31,78 @@
     <!-- Vercel Web Analytics -->
     <Analytics />
 
-    <!-- New View Dialog -->
-    <v-dialog v-model="showNewViewDialog" max-width="500">
-      <v-card>
-        <v-card-title>Create New View</v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="newViewName"
-            label="View Name"
-            placeholder="My Custom View"
-            variant="outlined"
-            density="compact"
-            class="mb-2"
-          ></v-text-field>
-          <v-checkbox
-            v-model="newViewIsPublic"
-            label="Make this view public (visible to all users)"
-            density="compact"
-          ></v-checkbox>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showNewViewDialog = false">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" @click="createNewView" :disabled="!newViewName.trim()">Create</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="showDeleteDialog" max-width="400">
-      <v-card>
-        <v-card-title>Delete View</v-card-title>
-        <v-card-text>Are you sure you want to delete this view? This action cannot be undone.</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showDeleteDialog = false">Cancel</v-btn>
-          <v-btn color="error" variant="flat" @click="deleteView">Delete</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Edit View Name Dialog -->
-    <v-dialog v-model="showEditDialog" max-width="500">
-      <v-card>
-        <v-card-title>Rename View</v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="editViewName"
-            label="View Name"
-            placeholder="My Custom View"
-            variant="outlined"
-            density="compact"
-            autofocus
-            @keyup.enter="saveViewName"
-          ></v-text-field>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showEditDialog = false">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" @click="saveViewName" :disabled="!editViewName.trim()">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-app>
+    <!-- Dialogs -->
+    <NewViewDialog
+      v-model:open="newViewOpen"
+      @create="createNewView"
+    />
+    <DeleteViewDialog
+      v-model:open="deleteOpen"
+      @confirm="deleteView"
+    />
+    <RenameViewDialog
+      v-model:open="editOpen"
+      :current-name="editViewName"
+      @save="saveViewName"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useTheme } from 'vuetify'
 import { useRouter } from 'vue-router'
 import { useViewsStore } from '@/stores/views'
-import WelcomeDialog from '@/components/common/WelcomeDialog.vue'
 import { Analytics } from '@vercel/analytics/vue'
 import packageInfo from '../package.json'
 import { gridSummaryLayout } from '@/views/layouts/gridSummaryLayout'
 import { largeDisplayLayout } from '@/views/layouts/largeDisplayLayout'
 
-const theme = useTheme()
+import AppHeader from '@/components/layout/AppHeader.vue'
+import SideNav from '@/components/layout/SideNav.vue'
+import MobileNav from '@/components/layout/MobileNav.vue'
+import WelcomeDialog from '@/components/common/WelcomeDialog.vue'
+import NewViewDialog from '@/components/dialogs/NewViewDialog.vue'
+import DeleteViewDialog from '@/components/dialogs/DeleteViewDialog.vue'
+import RenameViewDialog from '@/components/dialogs/RenameViewDialog.vue'
+
 const router = useRouter()
 const viewsStore = useViewsStore()
-const drawer = ref(false)
-const showNewViewDialog = ref(false)
-const showDeleteDialog = ref(false)
-const showEditDialog = ref(false)
-const newViewName = ref('')
-const newViewIsPublic = ref(false)
+const version = (packageInfo as { version: string }).version
+
+// Navigation drawer
+const drawerOpen = ref(false)
+
+// Dialog state
+const newViewOpen = ref(false)
+const deleteOpen = ref(false)
+const editOpen = ref(false)
 const viewToDelete = ref<string | null>(null)
 const viewToEdit = ref<string | null>(null)
 const editViewName = ref('')
-const version = (packageInfo as { version: string }).version
 
 const privateViews = computed(() => viewsStore.privateViews)
 const publicViews = computed(() => viewsStore.publicViews)
 
-function toggleTheme() {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
-}
-
-function navigate(path: string) {
-  drawer.value = false
-  router.push(path)
-}
-
 function copyView(sourceKey: string, sourceName: string) {
   const newView = viewsStore.createView(`${sourceName} (Copy)`, false)
-  
-  // Get the layout based on the source key
   let layoutToCopy: typeof gridSummaryLayout = []
-  if (sourceKey === 'grid-summary') {
-    layoutToCopy = gridSummaryLayout
-  } else if (sourceKey === 'large-display') {
-    layoutToCopy = largeDisplayLayout
-  }
-  
-  if (layoutToCopy.length > 0) {
-    // Update the view's layout in the store
-    viewsStore.updateViewLayout(newView.id, layoutToCopy)
-  }
-  
-  drawer.value = false
+  if (sourceKey === 'grid-summary') layoutToCopy = gridSummaryLayout
+  else if (sourceKey === 'large-display') layoutToCopy = largeDisplayLayout
+  if (layoutToCopy.length > 0) viewsStore.updateViewLayout(newView.id, layoutToCopy)
+  drawerOpen.value = false
   router.push(`/view/${newView.id}`)
 }
 
-function createNewView() {
-  const trimmedName = newViewName.value.trim()
-  if (!trimmedName || trimmedName.length < 2) return
-  
-  const newView = viewsStore.createView(trimmedName, newViewIsPublic.value)
-  
-  // Reset form
-  showNewViewDialog.value = false
-  newViewName.value = ''
-  newViewIsPublic.value = false
-  drawer.value = false
-  
-  // Navigate to the new view
+function createNewView(name: string, isPublic: boolean) {
+  const newView = viewsStore.createView(name, isPublic)
+  newViewOpen.value = false
+  drawerOpen.value = false
   router.push(`/view/${newView.id}`)
 }
 
 function confirmDeleteView(viewId: string) {
   viewToDelete.value = viewId
-  showDeleteDialog.value = true
+  deleteOpen.value = true
 }
 
 function deleteView() {
@@ -275,85 +110,63 @@ function deleteView() {
     viewsStore.deleteView(viewToDelete.value)
     viewToDelete.value = null
   }
-  showDeleteDialog.value = false
+  deleteOpen.value = false
 }
 
 function confirmEditView(viewId: string, currentName: string) {
   viewToEdit.value = viewId
   editViewName.value = currentName
-  showEditDialog.value = true
+  editOpen.value = true
 }
 
-function saveViewName() {
-  const trimmedName = editViewName.value.trim()
-  if (!trimmedName || trimmedName.length < 2) return
-  
+function saveViewName(name: string) {
   if (viewToEdit.value) {
-    viewsStore.updateViewName(viewToEdit.value, trimmedName)
+    viewsStore.updateViewName(viewToEdit.value, name)
     viewToEdit.value = null
   }
-  
-  showEditDialog.value = false
+  editOpen.value = false
   editViewName.value = ''
 }
 </script>
 
 <style scoped>
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Mobile: add bottom padding for the bottom nav bar */
+@media (max-width: 768px) {
+  .app-main {
+    padding-bottom: 56px;
+  }
+}
+
 .version-display {
   position: fixed;
   bottom: 8px;
   right: 12px;
   font-size: 11px;
-  color: rgb(var(--v-theme-on-surface));
+  color: hsl(var(--muted-foreground));
   opacity: 0.4;
   z-index: 1000;
   pointer-events: none;
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
-/* Dark app bar - differentiated from view content */
-.app-bar-dark {
-  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%) !important;
-  border-bottom: 1px solid rgba(88, 166, 255, 0.3);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4) !important;
-}
-
-:deep(.v-app-bar-title) {
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-/* Navigation drawer styling */
-:deep(.v-navigation-drawer) {
-  background: linear-gradient(180deg, 
-    rgba(var(--v-theme-surface), 0.98) 0%, 
-    rgba(var(--v-theme-background), 1) 100%) !important;
-  border-right: 1px solid rgba(var(--v-theme-primary), 0.2) !important;
-}
-
-:deep(.v-navigation-drawer .v-list-item:hover) {
-  background: linear-gradient(90deg, 
-    rgba(var(--v-theme-primary), 0.1) 0%, 
-    transparent 100%);
-}
-
-:deep(.v-navigation-drawer .v-list-item--active) {
-  background: linear-gradient(90deg, 
-    rgba(var(--v-theme-primary), 0.2) 0%, 
-    rgba(var(--v-theme-secondary), 0.1) 100%);
-  border-left: 3px solid rgb(var(--v-theme-primary));
-}
-
-/* Dialog styling */
-:deep(.v-dialog .v-card) {
-  background: linear-gradient(145deg, 
-    rgba(var(--v-theme-surface), 0.98) 0%, 
-    rgba(var(--v-theme-surface-bright), 0.95) 100%) !important;
-  border: 1px solid rgba(var(--v-theme-primary), 0.2);
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.4),
-    0 0 60px rgba(var(--v-theme-primary), 0.1) !important;
+@media (max-width: 768px) {
+  .version-display {
+    bottom: 64px;
+  }
 }
 </style>

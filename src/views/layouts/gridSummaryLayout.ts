@@ -118,17 +118,43 @@ export const gridSummaryLayout: LayoutItem[] = [
     style: {} 
   },
   
-  // Row 4: Frequency and Price charts side by side
-  { 
-    i: 'freq-chart', x: 0, y: 17, w: 6, h: 5, type: 'chart', 
-    title: 'Grid Frequency (4h)', 
-    config: { tag: 'ERCOT.GRID_FREQ', durationHours: 4, unit: 'Hz' }, 
-    style: { valueColor: COLORS.FREQUENCY } 
+  // Row 4: ERCOT Map + Mini Dashboard
+  {
+    i: 'ercot-map', x: 0, y: 17, w: 6, h: 8, type: 'map',
+    title: 'ERCOT Grid Map',
+    config: {},
+    style: {}
   },
-  { 
-    i: 'price-chart', x: 6, y: 17, w: 6, h: 5, type: 'chart', 
-    title: 'Real-Time Price (24h)', 
-    config: { tag: 'ERCOT.RT_PRICE', durationHours: 24, unit: '$', decimals: 2 }, 
-    style: { valueColor: COLORS.PRICE } 
+  {
+    i: 'mini-dash', x: 6, y: 17, w: 3, h: 4, type: 'minidash',
+    title: 'Quick Stats',
+    config: {},
+    style: {}
+  },
+  {
+    i: 'freq-trend', x: 9, y: 17, w: 3, h: 4, type: 'trend',
+    title: 'Frequency Trend',
+    config: { tag: 'ERCOT.GRID_FREQ', unit: 'Hz', decimals: 3 },
+    style: { valueColor: COLORS.FREQUENCY }
+  },
+
+  // Row 5: Frequency and Price charts side by side
+  {
+    i: 'freq-chart', x: 6, y: 21, w: 6, h: 5, type: 'chart',
+    title: 'Grid Frequency (4h)',
+    config: { tag: 'ERCOT.GRID_FREQ', durationHours: 4, unit: 'Hz' },
+    style: { valueColor: COLORS.FREQUENCY }
+  },
+  {
+    i: 'price-chart', x: 0, y: 25, w: 6, h: 5, type: 'chart',
+    title: 'Real-Time Price (24h)',
+    config: { tag: 'ERCOT.RT_PRICE', durationHours: 24, unit: '$', decimals: 2 },
+    style: { valueColor: COLORS.PRICE }
+  },
+  {
+    i: 'demand-heatcal', x: 6, y: 26, w: 6, h: 4, type: 'heatcalendar',
+    title: 'Demand History (90 days)',
+    config: { tag: 'ERCOT.SYSTEM_LOAD', unit: 'MW' },
+    style: {}
   }
 ]
