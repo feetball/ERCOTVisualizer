@@ -43,12 +43,12 @@ const { setOption } = useECharts(chartEl)
 
 // Power flow lines between regions (approximate center points)
 const regionCenters: Record<string, [number, number]> = {
-  west:    [-102.0, 32.5],
-  north:   [-97.0, 33.0],
-  east:    [-94.3, 31.5],
-  houston: [-95.3, 30.0],
-  south:   [-97.2, 29.5],
-  coast:   [-94.8, 28.2],
+  west:    [-102.5, 32.0],
+  north:   [-96.5, 32.5],
+  east:    [-94.5, 31.0],
+  houston: [-95.2, 29.5],
+  south:   [-97.5, 30.0],
+  coast:   [-98.5, 27.0],
 }
 
 const flowPaths = [
