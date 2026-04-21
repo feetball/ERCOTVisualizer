@@ -64,7 +64,7 @@
                   <template v-if="editMode">
                     <button
                       type="button"
-                      class="widget-action-btn tw-p-1 tw-rounded hover:tw-bg-accent/50 tw-text-muted-foreground hover:tw-text-foreground tw-transition-colors"
+                      class="tw-p-1 tw-rounded hover:tw-bg-accent/50 tw-text-muted-foreground hover:tw-text-foreground tw-transition-colors"
                       @mousedown.stop
                       @click.stop="editWidget(item)"
                     >
@@ -72,7 +72,7 @@
                     </button>
                     <button
                       type="button"
-                      class="widget-action-btn tw-p-1 tw-rounded hover:tw-bg-destructive/20 tw-text-muted-foreground hover:tw-text-destructive tw-transition-colors"
+                      class="tw-p-1 tw-rounded hover:tw-bg-destructive/20 tw-text-muted-foreground hover:tw-text-destructive tw-transition-colors"
                       @mousedown.stop
                       @click.stop="removeWidget(item.i)"
                     >
