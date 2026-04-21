@@ -1,5 +1,6 @@
 <template>
   <button
+    type="button"
     class="nav-item tw-group tw-flex tw-items-center tw-w-full tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-foreground/80 hover:tw-text-foreground hover:tw-bg-accent/60 tw-transition-all tw-duration-150"
     @click="$emit('click')"
   >
