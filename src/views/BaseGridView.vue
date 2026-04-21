@@ -6,7 +6,7 @@
       <div class="tw-flex tw-items-center tw-gap-1">
         <TimeSelector @update:time="handleTimeUpdate" class="tw-hidden sm:tw-flex" />
 
-        <button v-if="canEdit" class="toolbar-btn" :class="{ active: editMode }" @click="toggleEditMode">
+        <button v-if="canEdit" type="button" class="toolbar-btn" :class="{ active: editMode }" @click="toggleEditMode">
           <component :is="editMode ? Check : Pencil" :size="14" />
           <span class="tw-hidden sm:tw-inline">{{ editMode ? 'Done' : 'Edit' }}</span>
         </button>
@@ -17,18 +17,18 @@
 
         <template v-if="editMode && canEdit">
           <div class="tw-relative" ref="addMenuRef">
-            <button class="toolbar-btn" @click="addMenuOpen = !addMenuOpen">
+            <button type="button" class="toolbar-btn" @click="addMenuOpen = !addMenuOpen">
               <Plus :size="14" />
               <span class="tw-hidden md:tw-inline">Add Widget</span>
             </button>
             <div v-if="addMenuOpen" class="add-menu glass-card-solid">
-              <button v-for="wt in addableWidgets" :key="wt.type" class="add-menu-item" @click="addWidget(wt.type); addMenuOpen = false">
+              <button v-for="wt in addableWidgets" :key="wt.type" type="button" class="add-menu-item" @click="addWidget(wt.type); addMenuOpen = false">
                 <component :is="wt.icon" :size="14" class="tw-text-muted-foreground" />
                 {{ wt.label }}
               </button>
             </div>
           </div>
-          <button class="toolbar-btn" @click="resetLayout">
+          <button type="button" class="toolbar-btn" @click="resetLayout">
             <RotateCcw :size="14" />
             <span class="tw-hidden md:tw-inline">Reset</span>
           </button>
@@ -62,10 +62,20 @@
                 <div class="widget-title" :style="getTitleStyle(item)" :class="{ 'widget-title-edit': editMode }">
                   <span class="tw-flex-1 tw-truncate">{{ item.title }}</span>
                   <template v-if="editMode">
-                    <button class="tw-p-1 tw-rounded hover:tw-bg-accent/50 tw-text-muted-foreground hover:tw-text-foreground tw-transition-colors" @click="editWidget(item)">
+                    <button
+                      type="button"
+                      class="tw-p-1 tw-rounded hover:tw-bg-accent/50 tw-text-muted-foreground hover:tw-text-foreground tw-transition-colors"
+                      @mousedown.stop
+                      @click.stop="editWidget(item)"
+                    >
                       <Pencil :size="12" />
                     </button>
-                    <button class="tw-p-1 tw-rounded hover:tw-bg-destructive/20 tw-text-muted-foreground hover:tw-text-destructive tw-transition-colors" @click="removeWidget(item.i)">
+                    <button
+                      type="button"
+                      class="tw-p-1 tw-rounded hover:tw-bg-destructive/20 tw-text-muted-foreground hover:tw-text-destructive tw-transition-colors"
+                      @mousedown.stop
+                      @click.stop="removeWidget(item.i)"
+                    >
                       <X :size="12" />
                     </button>
                   </template>
@@ -101,7 +111,7 @@
       <span class="tw-hidden sm:tw-block">Last refresh: {{ lastRefreshFormatted }}</span>
       <div class="tw-flex tw-items-center tw-gap-2">
         <span class="tw-hidden md:tw-block">Auto-refresh: {{ refreshInterval }}s</span>
-        <button class="tw-p-0.5 tw-rounded hover:tw-bg-accent/50 tw-transition-colors" @click="refreshAllWidgets">
+        <button type="button" class="tw-p-0.5 tw-rounded hover:tw-bg-accent/50 tw-transition-colors" @click="refreshAllWidgets">
           <RefreshCw :size="12" :class="{ 'tw-animate-spin': isRefreshing }" />
         </button>
         <span class="tw-font-mono tw-opacity-60">v{{ version }}</span>
