@@ -25,6 +25,20 @@ describe('GridSummaryView', () => {
     expect(wrapper.text()).toContain('Grid Summary')
   })
 
+  it('shows the edit control for the default grid summary view', () => {
+    const wrapper = mount(GridSummaryView, {
+      global: {
+        stubs: {
+          'grid-layout': true,
+          'grid-item': true,
+        }
+      }
+    })
+
+    expect(wrapper.text()).toContain('Edit')
+    expect(wrapper.text()).not.toContain('View Only')
+  })
+
   it('has default layout with expected widgets', async () => {
     const { default: component } = await import('../GridSummaryView.vue')
     expect(component).toBeDefined()
